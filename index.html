@@ -3,150 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Batch Metadata - Fixed Version</title>
+    <title>AI Metadata Generator - Debug Version</title>
     <style>
-        :root { --primary: #2563eb; --success: #16a34a; --bg: #f1f5f9; --card: #ffffff; --dark: #0f172a; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #334155; }
-        .container { max-width: 1000px; margin: auto; background: var(--card); border-radius: 12px; box-shadow: 0 10px 15px rgba(0,0,0,0.1); overflow: hidden; }
-        
+        :root { --primary: #2563eb; --bg: #f1f5f9; --card: #ffffff; --dark: #0f172a; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: var(--card); border-radius: 12px; box-shadow: 0 10px 15px rgba(0,0,0,0.1); overflow: hidden; }
         .tabs { display: flex; background: var(--dark); }
-        .tab-btn { flex: 1; padding: 18px; border: none; background: none; color: #94a3b8; cursor: pointer; font-weight: bold; border-bottom: 3px solid transparent; }
+        .tab-btn { flex: 1; padding: 15px; border: none; background: none; color: #94a3b8; cursor: pointer; font-weight: bold; border-bottom: 3px solid transparent; }
         .tab-btn.active { color: white; border-bottom-color: var(--primary); background: rgba(255,255,255,0.05); }
-
         .tab-content { padding: 30px; display: none; }
         .tab-content.active { display: block; }
-
-        .api-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px; margin-bottom: 15px; }
-        .main-btn { background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; width: 100%; font-size: 16px; margin-top: 10px; }
-        
-        .drop-zone { border: 3px dashed #cbd5e1; padding: 40px; text-align: center; border-radius: 12px; cursor: pointer; }
-        
+        .main-btn { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 10px; }
+        .main-btn:disabled { background: #ccc; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #e2e8f0; padding: 12px; text-align: left; }
-        .img-mini { width: 60px; height: 60px; object-fit: cover; border-radius: 4px; }
-
-        .result-item { border: 1px solid #e2e8f0; margin-bottom: 20px; padding: 20px; border-radius: 8px; background: #fff; }
-        .result-grid { display: grid; gap: 15px; margin-top: 15px; }
-        .data-field { background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #edf2f7; position: relative; }
-        .data-label { font-size: 11px; font-weight: bold; color: #64748b; text-transform: uppercase; }
-        
-        .copy-btn { float: right; background: #64748b; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; }
-        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+        th, td { border: 1px solid #e2e8f0; padding: 10px; text-align: left; }
+        .img-mini { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; }
+        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+        .error-msg { color: #dc2626; font-size: 10px; display: block; margin-top: 4px; max-width: 200px; word-wrap: break-word; }
         .pending { background: #f1f5f9; }
         .loading { background: #dbeafe; color: #1e40af; }
         .done { background: #dcfce7; color: #166534; }
         .error { background: #fee2e2; color: #991b1b; }
+        .result-box { border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; margin-bottom: 15px; background: #fff; }
+        .copy-btn { background: #64748b; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; float: right; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="tabs">
-        <button class="tab-btn active" id="btn0" onclick="goToTab(0)">1. API SETUP</button>
-        <button class="tab-btn" id="btn1" onclick="goToTab(1)">2. UPLOAD</button>
-        <button class="tab-btn" id="btn2" onclick="goToTab(2)">3. PROSES</button>
-        <button class="tab-btn" id="btn3" onclick="goToTab(3)">4. HASIL</button>
+        <button class="tab-btn active" onclick="showTab(0)">1. API KEY</button>
+        <button class="tab-btn" onclick="showTab(1)">2. UPLOAD</button>
+        <button class="tab-btn" onclick="showTab(2)">3. PROSES</button>
+        <button class="tab-btn" onclick="showTab(3)">4. HASIL</button>
     </div>
 
-    <div id="tab0" class="tab-content active">
-        <h2>Setup Groq Cloud API</h2>
-        <div class="api-box">
-            <input type="password" id="apiKeyInput" placeholder="Masukkan API Key (gsk_...)" style="width:100%; padding:12px; border-radius:6px; border:1px solid #ccc;">
-            <p><a href="https://console.groq.com/keys" target="_blank" style="color:var(--primary);">Dapatkan API Key di sini (Gratis)</a></p>
-        </div>
-        <button class="main-btn" onclick="saveKey()">Simpan & Mulai</button>
+    <div id="t0" class="tab-content active">
+        <h3>Langkah 1: Masukkan API Key</h3>
+        <input type="password" id="keyInput" placeholder="gsk_..." style="width:100%; padding:10px; margin-bottom:10px;">
+        <p style="font-size:12px;">Dapatkan di: <a href="https://console.groq.com/keys" target="_blank">console.groq.com/keys</a></p>
+        <button class="main-btn" onclick="saveKey()">Simpan & Lanjut</button>
     </div>
 
-    <div id="tab1" class="tab-content">
-        <h2>Pilih Foto</h2>
-        <div class="drop-zone" onclick="document.getElementById('fileInput').click()">
-            <strong>Klik untuk pilih banyak foto</strong>
-            <input type="file" id="fileInput" multiple accept="image/*" style="display:none" onchange="loadFiles(this.files)">
-        </div>
-        <div id="fileCount" style="margin-top:15px; font-weight:bold;"></div>
-        <button class="main-btn" id="btnToTab2" style="display:none" onclick="goToTab(2)">Lanjut ke Pemrosesan</button>
+    <div id="t1" class="tab-content">
+        <h3>Langkah 2: Upload Gambar</h3>
+        <input type="file" id="fileInput" multiple accept="image/*" onchange="prepareFiles(this.files)">
+        <div id="fileNote" style="margin-top:10px;"></div>
+        <button class="main-btn" id="toTab2Btn" style="display:none;" onclick="showTab(2)">Lanjut ke Proses</button>
     </div>
 
-    <div id="tab2" class="tab-content">
-        <h2>Proses Identifikasi</h2>
-        <button class="main-btn" id="startBtn" onclick="processAll()">Mulai Generate Sekarang</button>
+    <div id="t2" class="tab-content">
+        <h3>Langkah 3: Menjalankan AI</h3>
+        <button class="main-btn" id="runBtn" onclick="processQueue()">Mulai Generate Metadata</button>
         <table>
-            <thead><tr><th>Preview</th><th>Nama File</th><th>Status</th></tr></thead>
-            <tbody id="queueList"></tbody>
+            <thead><tr><th>Foto</th><th>Nama</th><th>Status</th></tr></thead>
+            <tbody id="queueTbody"></tbody>
         </table>
     </div>
 
-    <div id="tab3" class="tab-content">
-        <h2>Hasil Metadata AI</h2>
-        <div id="resultsList"></div>
-        <button class="main-btn" style="background:#64748b" onclick="location.reload()">Bersihkan & Ulangi</button>
+    <div id="t3" class="tab-content">
+        <h3>Langkah 4: Hasil Selesai</h3>
+        <div id="finalResults"></div>
+        <button class="main-btn" style="background:#4b5563" onclick="location.reload()">Mulai Ulang</button>
     </div>
 </div>
 
 <script>
-    let filesData = [];
-
-    function goToTab(i) {
+    let queue = [];
+    
+    function showTab(i) {
         document.querySelectorAll('.tab-content').forEach((t, idx) => t.classList.toggle('active', i === idx));
         document.querySelectorAll('.tab-btn').forEach((b, idx) => b.classList.toggle('active', i === idx));
     }
 
     function saveKey() {
-        const k = document.getElementById('apiKeyInput').value;
-        if(k.includes('gsk_')) {
-            localStorage.setItem('groq_key', k);
+        const val = document.getElementById('keyInput').value.trim();
+        if(val.startsWith('gsk_')) {
+            localStorage.setItem('GROQ_API_KEY', val);
             alert("API Key Tersimpan!");
-            goToTab(1);
+            showTab(1);
         } else {
-            alert("Masukkan API Key yang valid!");
+            alert("API Key tidak valid! Harus diawali 'gsk_'");
         }
     }
 
-    // Auto-load key
-    if(localStorage.getItem('groq_key')) document.getElementById('apiKeyInput').value = localStorage.getItem('groq_key');
+    if(localStorage.getItem('GROQ_API_KEY')) document.getElementById('keyInput').value = localStorage.getItem('GROQ_API_KEY');
 
-    function loadFiles(files) {
-        filesData = [];
-        const list = document.getElementById('queueList');
-        list.innerHTML = "";
-        
-        Array.from(files).forEach((file, i) => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                filesData.push({
-                    id: i,
-                    name: file.name,
-                    base64: e.target.result.split(',')[1],
-                    preview: e.target.result,
-                    status: 'pending'
-                });
-                list.innerHTML += `<tr id="row-${i}">
+    function prepareFiles(files) {
+        queue = [];
+        const tbody = document.getElementById('queueTbody');
+        tbody.innerHTML = "";
+        Array.from(files).forEach((f, i) => {
+            const r = new FileReader();
+            r.onload = (e) => {
+                queue.push({ id: i, name: f.name, base64: e.target.result.split(',')[1], preview: e.target.result });
+                tbody.innerHTML += `<tr>
                     <td><img src="${e.target.result}" class="img-mini"></td>
-                    <td>${file.name}</td>
-                    <td><span id="st-${i}" class="status-badge pending">Menunggu</span></td>
+                    <td>${f.name}</td>
+                    <td id="stat-cell-${i}"><span class="status-badge pending">Siap</span></td>
                 </tr>`;
             };
-            reader.readAsDataURL(file);
+            r.readAsDataURL(f);
         });
-        document.getElementById('fileCount').innerText = files.length + " File dipilih";
-        document.getElementById('btnToTab2').style.display = "block";
+        document.getElementById('toTab2Btn').style.display = "block";
     }
 
-    async function processAll() {
-        const key = localStorage.getItem('groq_key');
-        if(!key) return alert("API Key hilang!");
-        
-        document.getElementById('startBtn').disabled = true;
-        const resultsList = document.getElementById('resultsList');
-        resultsList.innerHTML = ""; // Reset hasil
+    async function processQueue() {
+        const key = localStorage.getItem('GROQ_API_KEY');
+        const btn = document.getElementById('runBtn');
+        btn.disabled = true;
 
-        for(let item of filesData) {
-            const st = document.getElementById(`st-${item.id}`);
-            st.innerText = "Memproses...";
-            st.className = "status-badge loading";
+        for(let item of queue) {
+            const cell = document.getElementById(`stat-cell-${item.id}`);
+            cell.innerHTML = `<span class="status-badge loading">Memproses...</span>`;
 
             try {
-                const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                     method: "POST",
                     headers: { "Authorization": `Bearer ${key}`, "Content-Type": "application/json" },
                     body: JSON.stringify({
@@ -154,7 +126,7 @@
                         messages: [{
                             role: "user",
                             content: [
-                                { type: "text", text: "Create Microstock Metadata. Return JSON with 'title', 'description', and 'keywords' (list of 60 words). No technical terms (4k, uhd). English only." },
+                                { type: "text", text: "Create Microstock Metadata. Return JSON: {title: '80 chars', description: '200 chars', keywords: '60 single words'}. No technical terms (4k, uhd)." },
                                 { type: "image_url", image_url: { url: `data:image/jpeg;base64,${item.base64}` } }
                             ]
                         }],
@@ -162,90 +134,69 @@
                     })
                 });
 
-                const json = await res.json();
-                const aiResult = JSON.parse(json.choices[0].message.content);
-                const final = cleanMetadata(aiResult);
-                
-                renderResult(item, final);
-                
-                st.innerText = "Berhasil";
-                st.className = "status-badge done";
+                const data = await response.json();
+
+                if (data.error) {
+                    throw new Error(data.error.message || "API Error");
+                }
+
+                const content = JSON.parse(data.choices[0].message.content);
+                const clean = finalizeMetadata(content);
+                renderFinal(item, clean);
+
+                cell.innerHTML = `<span class="status-badge done">Berhasil</span>`;
             } catch (err) {
                 console.error(err);
-                st.innerText = "Error!";
-                st.className = "status-badge error";
+                cell.innerHTML = `
+                    <span class="status-badge error">Error!</span>
+                    <span class="error-msg">${err.message}</span>
+                `;
             }
+            // Delay 1 detik untuk menghindari Rate Limit
+            await new Promise(r => setTimeout(r, 1000));
         }
-        alert("Semua selesai!");
-        goToTab(3);
+        btn.disabled = false;
+        alert("Proses Selesai! Silakan cek Tab HASIL.");
+        showTab(3);
     }
 
-    function cleanMetadata(data) {
-        // Gabungkan semua keyword jadi satu string lalu pecah per kata
-        let raw = (Array.isArray(data.keywords) ? data.keywords.join(' ') : data.keywords).toLowerCase();
+    function finalizeMetadata(data) {
+        let kw = (Array.isArray(data.keywords) ? data.keywords.join(' ') : String(data.keywords))
+                 .toLowerCase()
+                 .replace(/4k|uhd|resolution|hd|video|high quality/g, '')
+                 .split(/[,\s]+/)
+                 .filter(w => w.length > 2);
         
-        // Buang kata terlarang dan pecah menjadi kata tunggal
-        let words = raw.replace(/4k|uhd|resolution|hd|video|camera|premium/g, '')
-                       .split(/[,\s]+/)
-                       .filter(w => w.length > 2);
+        kw = [...new Set(kw)];
+        const fillers = ['background', 'concept', 'natural', 'view', 'isolated', 'scenery', 'outdoor', 'composition', 'daylight', 'nobody'];
         
-        words = [...new Set(words)]; // Hapus duplikat
-
-        // Paksa jumlah 39-41
-        const fill = ['background', 'concept', 'natural', 'view', 'isolated', 'scenery', 'element', 'outdoor', 'bright', 'composition'];
-        if(words.length > 40) {
-            words = words.slice(0, 40);
-        } else {
-            while(words.length < 39) {
-                let f = fill[Math.floor(Math.random() * fill.length)];
-                if(!words.includes(f)) words.push(f);
-            }
+        if(kw.length > 40) kw = kw.slice(0, 40);
+        else while(kw.length < 39) {
+            let f = fillers[Math.floor(Math.random() * fillers.length)];
+            if(!kw.includes(f)) kw.push(f);
         }
 
-        return {
-            title: data.title || "No Title Generated",
-            desc: data.description || "No Description Generated",
-            keywords: words.join(', ')
-        };
+        return { title: data.title, desc: data.description, keywords: kw.join(', ') };
     }
 
-    function renderResult(item, data) {
-        const div = document.createElement('div');
-        div.className = 'result-item';
-        const kwCount = data.keywords.split(',').length;
-        
-        div.innerHTML = `
-            <div style="display:flex; gap:10px; align-items:center; border-bottom:1px solid #eee; padding-bottom:10px;">
-                <img src="${item.preview}" class="img-mini">
-                <strong>${item.name}</strong>
-            </div>
-            <div class="result-grid">
-                <div class="data-field">
-                    <span class="data-label">Title</span>
-                    <button class="copy-btn" onclick="copyThis(this)">Salin</button>
-                    <div class="text-content">${data.title}</div>
-                </div>
-                <div class="data-field">
-                    <span class="data-label">Description</span>
-                    <button class="copy-btn" onclick="copyThis(this)">Salin</button>
-                    <div class="text-content">${data.desc}</div>
-                </div>
-                <div class="data-field">
-                    <span class="data-label">Keywords (${kwCount} words)</span>
-                    <button class="copy-btn" onclick="copyThis(this)">Salin</button>
-                    <div class="text-content" style="font-size:12px;">${data.keywords}</div>
-                </div>
+    function renderFinal(item, data) {
+        const container = document.getElementById('finalResults');
+        const count = data.keywords.split(',').length;
+        const html = `
+            <div class="result-box">
+                <img src="${item.preview}" class="img-mini" style="margin-bottom:10px;"> <strong>${item.name}</strong>
+                <hr>
+                <p><strong>Title:</strong> <button class="copy-btn" onclick="cp('${data.title.replace(/'/g,"")}')">Salin</button><br>${data.title}</p>
+                <p><strong>Description:</strong> <button class="copy-btn" onclick="cp('${data.desc.replace(/'/g,"")}')">Salin</button><br>${data.desc}</p>
+                <p><strong>Keywords (${count}):</strong> <button class="copy-btn" onclick="cp('${data.keywords}')">Salin</button><br><span style="font-size:12px;">${data.keywords}</span></p>
             </div>
         `;
-        document.getElementById('resultsList').appendChild(div);
+        container.innerHTML += html;
     }
 
-    function copyThis(btn) {
-        const text = btn.parentElement.querySelector('.text-content').innerText;
-        navigator.clipboard.writeText(text);
-        btn.innerText = "✓ OK";
-        btn.style.background = "#16a34a";
-        setTimeout(() => { btn.innerText = "Salin"; btn.style.background = "#64748b"; }, 1500);
+    function cp(txt) {
+        navigator.clipboard.writeText(txt);
+        alert("Tersalin!");
     }
 </script>
 
