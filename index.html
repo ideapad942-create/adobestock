@@ -3,56 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Batch Metadata Pro - v2026</title>
+    <title>AI Metadata Pro - Turbo Edition</title>
     <style>
         :root { --primary: #2563eb; --success: #10b981; --dark: #0f172a; --bg: #f8fafc; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #1e293b; }
         .container { max-width: 1000px; margin: auto; background: white; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); overflow: hidden; }
-        
         .tabs { display: flex; background: var(--dark); padding: 5px; }
         .tab-btn { flex: 1; padding: 12px; border: none; background: none; color: #94a3b8; cursor: pointer; font-weight: 600; border-radius: 8px; }
         .tab-btn.active { color: white; background: var(--primary); }
-
         .content { padding: 30px; display: none; }
         .content.active { display: block; }
-
         .drop-zone { border: 2px dashed #cbd5e1; padding: 40px; text-align: center; border-radius: 12px; cursor: pointer; background: #f1f5f9; transition: 0.3s; }
-        .drop-zone:hover { border-color: var(--primary); background: #e2e8f0; }
-
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: left; }
         .img-mini { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; }
-
         .status { padding: 5px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; }
-        .status-wait { background: #e2e8f0; }
-        .status-run { background: #dbeafe; color: #1e40af; }
+        .status-run { background: #dbeafe; color: #1e40af; animation: blink 1s infinite; }
         .status-done { background: #d1fae5; color: #065f46; }
-
-        .btn { padding: 12px 24px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; width: 100%; margin-top: 10px; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .btn { padding: 12px 24px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; }
         .btn-primary { background: var(--primary); color: white; }
         .btn-success { background: var(--success); color: white; }
-        .btn-outline { border: 2px solid #e2e8f0; background: white; color: #64748b; }
-
-        .result-card { border: 1px solid #e2e8f0; padding: 15px; border-radius: 10px; margin-bottom: 15px; position: relative; }
-        .kw-tag { font-size: 11px; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; margin-right: 4px; display: inline-block; margin-top: 4px; }
-        .copy-btn { position: absolute; top: 10px; right: 10px; font-size: 11px; padding: 4px 8px; }
+        .result-card { border: 1px solid #e2e8f0; padding: 15px; border-radius: 10px; margin-bottom: 15px; background: #fff; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="tabs">
-        <button class="tab-btn active" id="b0" onclick="tab(0)">1. API</button>
-        <button class="tab-btn" id="b1" onclick="tab(1)">2. UPLOAD</button>
-        <button class="tab-btn" id="b2" onclick="tab(2)">3. PROSES</button>
-        <button class="tab-btn" id="b3" onclick="tab(3)">4. HASIL</button>
+        <button class="tab-btn active" onclick="tab(0)">1. API</button>
+        <button class="tab-btn" onclick="tab(1)">2. UPLOAD</button>
+        <button class="tab-btn" onclick="tab(2)">3. PROSES</button>
+        <button class="tab-btn" onclick="tab(3)">4. HASIL</button>
     </div>
 
     <div id="c0" class="content active">
-        <h2>Setup Groq API</h2>
+        <h2>Setup API</h2>
         <input type="password" id="apiKey" placeholder="gsk_..." style="width:100%; padding:12px; border-radius:8px; border:1px solid #ccc;">
         <p><a href="https://console.groq.com/keys" target="_blank" style="color:var(--primary); font-weight:bold;">👉 Generate API Key Di Sini</a></p>
-        <button class="btn btn-primary" onclick="saveKey()">Simpan & Mulai</button>
+        <button class="btn btn-primary" onclick="saveKey()">Simpan & Lanjut</button>
     </div>
 
     <div id="c1" class="content">
@@ -61,8 +50,8 @@
             <strong>Klik untuk pilih banyak foto</strong>
             <input type="file" id="files" multiple accept="image/*" style="display:none" onchange="loadFiles(this.files)">
         </div>
-        <div id="fileCount" style="margin-top:15px; font-weight:bold;"></div>
-        <button class="btn btn-primary" id="btnProses" style="display:none" onclick="tab(2)">Lanjut ke Pemrosesan</button>
+        <div id="fileCount" style="margin-top:10px;"></div>
+        <button class="btn btn-primary" id="btnGo" style="display:none" onclick="tab(2)">Lanjut ke Proses</button>
     </div>
 
     <div id="c2" class="content">
@@ -75,12 +64,13 @@
     </div>
 
     <div id="c3" class="content">
-        <h2>Hasil & Ekspor</h2>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:20px;">
-            <button class="btn btn-success" onclick="exportCSV()">📥 Ekspor Semua ke CSV</button>
-            <button class="btn btn-outline" onclick="resetApp()">📸 Upload Foto Lagi</button>
-        </div>
+        <h2>Hasil Metadata</h2>
         <div id="results"></div>
+        <hr>
+        <div style="margin-top:20px;">
+            <button class="btn btn-success" onclick="exportCSV()">📥 Download CSV (Semua Hasil)</button>
+            <button class="btn btn-primary" style="background:#64748b" onclick="resetApp()">📸 Upload Foto Lagi</button>
+        </div>
     </div>
 </div>
 
@@ -95,57 +85,52 @@
 
     function saveKey() {
         const k = document.getElementById('apiKey').value.trim();
-        if(k.startsWith('gsk_')) {
-            localStorage.setItem('GROQ_KEY_PRO', k);
-            tab(1);
-        } else alert("Key tidak valid!");
+        if(k.startsWith('gsk_')) { localStorage.setItem('GK_2026', k); tab(1); }
+        else alert("Key salah!");
     }
-    if(localStorage.getItem('GROQ_KEY_PRO')) document.getElementById('apiKey').value = localStorage.getItem('GROQ_KEY_PRO');
-
-    async function compress(file) {
-        return new Promise(res => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = (e) => {
-                const img = new Image();
-                img.src = e.target.result;
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    const size = 600; // Optimal speed for Groq
-                    let w = img.width, h = img.height;
-                    if(w > h) { h *= size/w; w = size; } else { w *= size/h; h = size; }
-                    canvas.width = w; canvas.height = h;
-                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                    res({ base64: canvas.toDataURL('image/jpeg', 0.8).split(',')[1], preview: e.target.result });
-                }
-            }
-        });
-    }
+    if(localStorage.getItem('GK_2026')) document.getElementById('apiKey').value = localStorage.getItem('GK_2026');
 
     async function loadFiles(files) {
         dataQueue = [];
         const q = document.getElementById('queue');
         q.innerHTML = "";
-        for(let i=0; i<files.length; i++) {
-            const compressed = await compress(files[i]);
-            dataQueue.push({ id: i, name: files[i].name, base64: compressed.base64, preview: compressed.preview });
-            q.innerHTML += `<tr>
-                <td><img src="${compressed.preview}" class="img-mini"></td>
-                <td>${files[i].name}</td>
-                <td id="st-${i}"><span class="status status-wait">Siap</span></td>
-            </tr>`;
+        for(let f of files) {
+            const b64 = await toBase64(f);
+            dataQueue.push({ name: f.name, base64: b64.data, preview: b64.prev });
+            q.innerHTML += `<tr><td><img src="${b64.prev}" class="img-mini"></td><td>${f.name}</td><td id="st-${dataQueue.length-1}">Siap</td></tr>`;
         }
-        document.getElementById('fileCount').innerText = files.length + " file siap.";
-        document.getElementById('btnProses').style.display = "block";
+        document.getElementById('btnGo').style.display = "block";
+    }
+
+    function toBase64(file) {
+        return new Promise(res => {
+            const r = new FileReader();
+            r.readAsDataURL(file);
+            r.onload = (e) => {
+                const img = new Image();
+                img.src = e.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const size = 512; // Ukuran super ringan
+                    let w = img.width, h = img.height;
+                    w > h ? (h *= size/w, w = size) : (w *= size/h, h = size);
+                    canvas.width = w; canvas.height = h;
+                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                    res({ data: canvas.toDataURL('image/jpeg', 0.6).split(',')[1], prev: e.target.result });
+                }
+            }
+        });
     }
 
     async function runAI() {
-        const key = localStorage.getItem('GROQ_KEY_PRO');
+        const key = localStorage.getItem('GK_2026');
         document.getElementById('startBtn').disabled = true;
-        processedResults = [];
-
-        for(let item of dataQueue) {
-            document.getElementById(`st-${item.id}`).innerHTML = `<span class="status status-run">Analisis...</span>`;
+        
+        for(let i=0; i<dataQueue.length; i++) {
+            const item = dataQueue[i];
+            const statusCell = document.getElementById(`st-${i}`);
+            statusCell.innerHTML = `<span class="status status-run">Analisis...</span>`;
+            
             try {
                 const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                     method: "POST",
@@ -155,76 +140,54 @@
                         messages: [{
                             role: "user",
                             content: [
-                                { type: "text", text: "JSON output: {title: '70 chars', description: '150 chars', keywords: '40 single words separated by comma'}. English only." },
+                                { type: "text", text: "Create Microstock Metadata. Format JSON: {title: '80 chars', description: '200 chars', keywords: 'comma separated list of 50 single words'}. Use English." },
                                 { type: "image_url", image_url: { url: `data:image/jpeg;base64,${item.base64}` } }
                             ]
                         }],
-                        response_format: { type: "json_object" },
-                        temperature: 0.1
+                        response_format: { type: "json_object" }
                     })
                 });
 
                 const json = await res.json();
-                const ai = JSON.parse(json.choices[0].message.content);
-                const final = clean(ai);
+                const content = JSON.parse(json.choices[0].message.content);
                 
-                processedResults.push({ filename: item.name, ...final });
-                render(item, final);
-                document.getElementById(`st-${item.id}`).innerHTML = `<span class="status status-done">Berhasil</span>`;
+                processedResults.push({ name: item.name, ...content });
+                renderResult(item, content);
+                statusCell.innerHTML = `<span class="status status-done">Selesai</span>`;
             } catch (e) {
-                document.getElementById(`st-${item.id}`).innerHTML = `<span class="status" style="background:red; color:white">Error</span>`;
+                statusCell.innerHTML = "Gagal!";
             }
+            await new Promise(r => setTimeout(r, 1000));
         }
         tab(3);
     }
 
-    function clean(ai) {
-        let kw = (ai.keywords || "").toLowerCase().replace(/[^a-zA-Z, ]/g, "").split(/[,\s]+/).filter(w => w.length > 2);
-        kw = [...new Set(kw)];
-        const fill = ['background', 'concept', 'isolated', 'scenery', 'natural', 'view', 'outdoor', 'composition', 'daylight', 'element'];
-        if(kw.length > 40) kw = kw.slice(0, 40);
-        else while(kw.length < 40) {
-            let f = fill[Math.floor(Math.random() * fill.length)];
-            if(!kw.includes(f)) kw.push(f);
-        }
-        return { title: ai.title, desc: ai.description, keywords: kw.join(', ') };
-    }
-
-    function render(item, data) {
+    function renderResult(item, data) {
         const div = document.createElement('div');
         div.className = 'result-card';
-        div.innerHTML = `
-            <strong>${item.name}</strong>
-            <p><strong>T:</strong> ${data.title}</p>
-            <p><strong>D:</strong> ${data.desc}</p>
-            <div style="font-size:11px; color:#64748b">${data.keywords}</div>
-        `;
+        div.innerHTML = `<strong>${item.name}</strong><br><b>T:</b> ${data.title}<br><b>D:</b> ${data.description}<br><small>${data.keywords}</small>`;
         document.getElementById('results').appendChild(div);
     }
 
     function exportCSV() {
         let csv = "Filename,Title,Description,Keywords\n";
         processedResults.forEach(r => {
-            csv += `"${r.filename}","${r.title.replace(/"/g,'')}","${r.desc.replace(/"/g,'')}","${r.keywords}"\n`;
+            csv += `"${r.name}","${r.title}","${r.description}","${r.keywords}"\n`;
         });
         const blob = new Blob([csv], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = url;
-        a.download = `Metadata_Export_${Date.now()}.csv`;
+        a.href = URL.createObjectURL(blob);
+        a.download = "metadata.csv";
         a.click();
     }
 
     function resetApp() {
-        dataQueue = [];
-        processedResults = [];
+        dataQueue = []; processedResults = [];
         document.getElementById('results').innerHTML = "";
         document.getElementById('queue').innerHTML = "";
-        document.getElementById('fileCount').innerText = "";
         document.getElementById('startBtn').disabled = false;
         tab(1);
     }
 </script>
-
 </body>
 </html>
