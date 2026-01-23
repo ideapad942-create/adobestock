@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Batch AI Microstock Generator</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+        }
+
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); padding: 20px; }
+        .container { max-width: 1000px; margin: auto; background: var(--card); border-radius: 12px; box-shadow: 0 10px 15px rgba(0,0,0,0.05); overflow: hidden; }
+        
+        /* Tabs */
+        .tabs { display: flex; background: #0f172a; }
+        .tab-btn { flex: 1; padding: 15px; border: none; background: none; color: #94a3b8; cursor: pointer; font-weight: 600; }
+        .tab-btn.active { color: white; border-bottom: 3px solid var(--primary); background: rgba(255,255,255,0.05); }
+        .tab-content { padding: 30px; display: none; }
+        .tab-content.active { display: block; }
+
+        /* Batch Upload */
+        .drop-zone { border: 2px dashed #cbd5e1; padding: 40px; text-align: center; border-radius: 10px; cursor: pointer; transition: 0.3s; }
+        .drop-zone:hover { border-color: var(--primary); background: #f1f5f9; }
+        
+        /* Table Styles */
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }
+        th, td { border: 1px solid #e2e8f0; padding: 12px; text-align: left; }
+        th { background: #f1f5f9; }
+        .img-preview-mini { width: 60px; height: 60px; object-fit: cover; border-radius: 4px; }
+        
+        /* Buttons & Badges */
+        .btn { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 500; }
+        .btn:disabled { background: #cbd5e1; }
+        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+        .pending { background: #fef3c7; color: #92400e; }
+        .processing { background: #dbeafe; color: #1e40af; }
+        .done { background: #dcfce7; color: #166534; }
+
+        .copy-btn { background: #64748b; color: white; border: none; padding: 5px; border-radius: 4px; cursor: pointer; font-size: 10px; margin-top: 5px; display: block; width: 100%; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="tabs">
+        <button class="tab-btn active" onclick="openTab(0)">CONFIG</button>
+        <button class="tab-btn" onclick="openTab(1)">UPLOAD BATCH</button>
+        <button class="tab-btn" onclick="openTab(2)">PROCESS QUEUE</button>
+        <button class="tab-btn" onclick="openTab(3)">RESULTS</button>
+    </div>
+
+    <div id="tab0" class="tab-content active">
+        <h2>Groq API Settings</h2>
+        <input type="password" id="apiKey" placeholder="Masukkan Groq API Key (gsk_...)" style="width: 100%; padding: 12px; margin-bottom: 20px;">
+        <button class="btn" onclick="saveKey()">Save & Continue</button>
+    </div>
+
+    <div id="tab1" class="tab-content">
+        <h2>Upload Multiple Images</h2>
+        <div class="drop-zone" onclick="document.getElementById('fileInput').click()">
+            <p>Klik di sini atau seret banyak foto sekaligus</p>
+            <input type="file" id="fileInput" multiple accept="image/*" style="display:none" onchange="handleFiles(this.files)">
+        </div>
+        <div id="fileListCount" style="margin-top: 15px; font-weight: bold;"></div>
+        <button class="btn" style="margin-top: 20px;" onclick="openTab(2)">Next: Start Processing</button>
+    </div>
+
+    <div id="tab2" class="tab-content">
+        <h2>Queue Processing</h2>
+        <p>Sistem akan memproses satu per satu agar stabil.</p>
+        <button class="btn" id="startBtn" onclick="startBatchProcess()">Start Batch Process</button>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Filename</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="queueTableBody">
+                </tbody>
+        </table>
+    </div>
+
+    <div id="tab3" class="tab-content">
+        <h2>All Results</h2>
+        <div id="resultsArea">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Title & Description</th>
+                        <th>Keywords (39-41)</th>
+                    </tr>
+                </thead>
+                <tbody id="resultTableBody">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    let queue = [];
+    let isProcessing = false;
+
+    function openTab(index) {
+        document.querySelectorAll('.tab-content').forEach((t, i) => t.classList.toggle('active', i === index));
+        document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i === index));
+    }
+
+    function saveKey() {
+        const key = document.getElementById('apiKey').value;
+        if(key) {
+            localStorage.setItem('groq_api_key', key);
+            openTab(1);
+        }
+    }
+
+    window.onload = () => {
+        const savedKey = localStorage.getItem('groq_api_key');
+        if(savedKey) document.getElementById('apiKey').value = savedKey;
+    }
+
+    // Handle Batch Files
+    function handleFiles(files) {
+        queue = [];
+        const tbody = document.getElementById('queueTableBody');
+        tbody.innerHTML = "";
+        document.getElementById('fileListCount').innerText = `${files.length} file dipilih.`;
+
+        Array.from(files).forEach((file, index) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                queue.push({
+                    id: index,
+                    file: file,
+                    base64: e.target.result.split(',')[1],
+                    status: 'pending'
+                });
+                
+                tbody.innerHTML += `
+                    <tr id="q-row-${index}">
+                        <td><img src="${e.target.result}" class="img-preview-mini"></td>
+                        <td>${file.name}</td>
+                        <td><span class="status-badge pending" id="status-${index}">Pending</span></td>
+                    </tr>
+                `;
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    async function startBatchProcess() {
+        if(isProcessing) return;
+        const apiKey = localStorage.getItem('groq_api_key');
+        if(!apiKey) return alert("API Key Kosong!");
+
+        isProcessing = true;
+        document.getElementById('startBtn').disabled = true;
+
+        for(let item of queue) {
+            if(item.status === 'done') continue;
+            
+            updateStatus(item.id, 'processing', 'Processing...');
+            
+            try {
+                const result = await callGroqAPI(apiKey, item.base64);
+                const finalData = cleanData(result);
+                addToResultTable(item, finalData);
+                updateStatus(item.id, 'done', 'Completed');
+                item.status = 'done';
+            } catch (e) {
+                updateStatus(item.id, 'pending', 'Error, retrying...');
+                console.error(e);
+            }
+        }
+        
+        isProcessing = false;
+        document.getElementById('startBtn').disabled = false;
+        alert("Batch Processing Selesai!");
+        openTab(3);
+    }
+
+    function updateStatus(id, @class, text) {
+        const el = document.getElementById(`status-${id}`);
+        el.className = `status-badge ${@class}`;
+        el.innerText = text;
+    }
+
+    async function callGroqAPI(key, base64) {
+        const prompt = `Task: Microstock Metadata SEO US. 
+        Return JSON with: "title" (80 chars), "description" (200 chars), "keywords" (60 words). 
+        Rules: No technical terms (4k, uhd, resolution). Focus on objects, mood, and supporting elements.`;
+
+        const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            method: "POST",
+            headers: { "Authorization": `Bearer ${key}`, "Content-Type": "application/json" },
+            body: JSON.stringify({
+                model: "llama-3.2-11b-vision-preview",
+                messages: [{ role: "user", content: [
+                    { type: "text", text: prompt },
+                    { type: "image_url", image_url: { url: `data:image/jpeg;base64,${base64}` } }
+                ]}],
+                response_format: { type: "json_object" }
+            })
+        });
+        const data = await response.json();
+        return JSON.parse(data.choices[0].message.content);
+    }
+
+    function cleanData(data) {
+        // Keyword Logic: 39-41 words, single word only
+        let kw = data.keywords.toLowerCase()
+                     .replace(/4k|uhd|resolution|high quality|video/g, '')
+                     .split(/[,\s]+/)
+                     .filter(w => w.length > 2);
+        
+        kw = [...new Set(kw)]; // Unique
+
+        // Ensure 39-41
+        if(kw.length > 40) kw = kw.slice(0, 40);
+        const fillers = ['background', 'concept', 'horizontal', 'outdoor', 'natural', 'view', 'composition', 'isolated', 'element'];
+        while(kw.length < 39) {
+            kw.push(fillers[Math.floor(Math.random() * fillers.length)]);
+            kw = [...new Set(kw)];
+        }
+
+        return {
+            title: data.title,
+            description: data.description,
+            keywords: kw.join(', ')
+        };
+    }
+
+    function addToResultTable(item, data) {
+        const tbody = document.getElementById('resultTableBody');
+        const row = `
+            <tr>
+                <td><img src="data:image/jpeg;base64,${item.base64}" class="img-preview-mini"></td>
+                <td>
+                    <strong>T:</strong> ${data.title} <button class="copy-btn" onclick="copyText('${data.title}')">Copy Title</button>
+                    <br><strong>D:</strong> ${data.description} <button class="copy-btn" onclick="copyText('${data.description}')">Copy Desc</button>
+                </td>
+                <td>
+                    ${data.keywords}
+                    <button class="copy-btn" onclick="copyText('${data.keywords}')">Copy Keywords (${data.keywords.split(',').length})</button>
+                </td>
+            </tr>
+        `;
+        tbody.innerHTML += row;
+    }
+
+    function copyText(text) {
+        navigator.clipboard.writeText(text);
+        // Simple visual feedback
+    }
+</script>
+
+</body>
+</html>
