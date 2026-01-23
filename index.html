@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Metadata Generator - Debug Version</title>
+    <title>AI Metadata Generator - Llama 4 Scout Version</title>
     <style>
         :root { --primary: #2563eb; --bg: #f1f5f9; --card: #ffffff; --dark: #0f172a; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; }
@@ -41,14 +41,13 @@
     <div id="t0" class="tab-content active">
         <h3>Langkah 1: Masukkan API Key</h3>
         <input type="password" id="keyInput" placeholder="gsk_..." style="width:100%; padding:10px; margin-bottom:10px;">
-        <p style="font-size:12px;">Dapatkan di: <a href="https://console.groq.com/keys" target="_blank">console.groq.com/keys</a></p>
+        <p style="font-size:12px;">Update 2026: Menggunakan model <b>Llama 4 Scout</b>.</p>
         <button class="main-btn" onclick="saveKey()">Simpan & Lanjut</button>
     </div>
 
     <div id="t1" class="tab-content">
         <h3>Langkah 2: Upload Gambar</h3>
         <input type="file" id="fileInput" multiple accept="image/*" onchange="prepareFiles(this.files)">
-        <div id="fileNote" style="margin-top:10px;"></div>
         <button class="main-btn" id="toTab2Btn" style="display:none;" onclick="showTab(2)">Lanjut ke Proses</button>
     </div>
 
@@ -62,7 +61,7 @@
     </div>
 
     <div id="t3" class="tab-content">
-        <h3>Langkah 4: Hasil Selesai</h3>
+        <h3>Langkah 4: Hasil Metadata</h3>
         <div id="finalResults"></div>
         <button class="main-btn" style="background:#4b5563" onclick="location.reload()">Mulai Ulang</button>
     </div>
@@ -79,15 +78,13 @@
     function saveKey() {
         const val = document.getElementById('keyInput').value.trim();
         if(val.startsWith('gsk_')) {
-            localStorage.setItem('GROQ_API_KEY', val);
-            alert("API Key Tersimpan!");
+            localStorage.setItem('GROQ_API_KEY_2026', val);
+            alert("API Key Berhasil Disimpan!");
             showTab(1);
-        } else {
-            alert("API Key tidak valid! Harus diawali 'gsk_'");
-        }
+        } else { alert("API Key tidak valid!"); }
     }
 
-    if(localStorage.getItem('GROQ_API_KEY')) document.getElementById('keyInput').value = localStorage.getItem('GROQ_API_KEY');
+    if(localStorage.getItem('GROQ_API_KEY_2026')) document.getElementById('keyInput').value = localStorage.getItem('GROQ_API_KEY_2026');
 
     function prepareFiles(files) {
         queue = [];
@@ -109,7 +106,7 @@
     }
 
     async function processQueue() {
-        const key = localStorage.getItem('GROQ_API_KEY');
+        const key = localStorage.getItem('GROQ_API_KEY_2026');
         const btn = document.getElementById('runBtn');
         btn.disabled = true;
 
@@ -122,11 +119,11 @@
                     method: "POST",
                     headers: { "Authorization": `Bearer ${key}`, "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        model: "llama-3.2-11b-vision-preview",
+                        model: "meta-llama/llama-4-scout-17b-16e-instruct", // Model Pengganti Sesuai Rekomendasi 2026
                         messages: [{
                             role: "user",
                             content: [
-                                { type: "text", text: "Create Microstock Metadata. Return JSON: {title: '80 chars', description: '200 chars', keywords: '60 single words'}. No technical terms (4k, uhd)." },
+                                { type: "text", text: "Create Microstock Metadata. Return JSON: {title: 'string (80 chars)', description: 'string (200 chars)', keywords: 'string (60 single words)'}. No technical terms (4k, uhd, resolution)." },
                                 { type: "image_url", image_url: { url: `data:image/jpeg;base64,${item.base64}` } }
                             ]
                         }],
@@ -135,40 +132,31 @@
                 });
 
                 const data = await response.json();
-
-                if (data.error) {
-                    throw new Error(data.error.message || "API Error");
-                }
+                if (data.error) throw new Error(data.error.message);
 
                 const content = JSON.parse(data.choices[0].message.content);
                 const clean = finalizeMetadata(content);
                 renderFinal(item, clean);
 
-                cell.innerHTML = `<span class="status-badge done">Berhasil</span>`;
+                cell.innerHTML = `<span class="status-badge done">Selesai</span>`;
             } catch (err) {
-                console.error(err);
-                cell.innerHTML = `
-                    <span class="status-badge error">Error!</span>
-                    <span class="error-msg">${err.message}</span>
-                `;
+                cell.innerHTML = `<span class="status-badge error">Error!</span><span class="error-msg">${err.message}</span>`;
             }
-            // Delay 1 detik untuk menghindari Rate Limit
-            await new Promise(r => setTimeout(r, 1000));
+            await new Promise(r => setTimeout(r, 1500)); // Delay sedikit lebih lama untuk Llama 4
         }
         btn.disabled = false;
-        alert("Proses Selesai! Silakan cek Tab HASIL.");
         showTab(3);
     }
 
     function finalizeMetadata(data) {
         let kw = (Array.isArray(data.keywords) ? data.keywords.join(' ') : String(data.keywords))
                  .toLowerCase()
-                 .replace(/4k|uhd|resolution|hd|video|high quality/g, '')
+                 .replace(/4k|uhd|resolution|hd|video|frame rate|fps|prores/g, '')
                  .split(/[,\s]+/)
                  .filter(w => w.length > 2);
         
         kw = [...new Set(kw)];
-        const fillers = ['background', 'concept', 'natural', 'view', 'isolated', 'scenery', 'outdoor', 'composition', 'daylight', 'nobody'];
+        const fillers = ['background', 'composition', 'isolated', 'scenery', 'outdoor', 'daylight', 'natural', 'view', 'nobody', 'atmosphere'];
         
         if(kw.length > 40) kw = kw.slice(0, 40);
         else while(kw.length < 39) {
@@ -182,21 +170,20 @@
     function renderFinal(item, data) {
         const container = document.getElementById('finalResults');
         const count = data.keywords.split(',').length;
-        const html = `
+        container.innerHTML += `
             <div class="result-box">
-                <img src="${item.preview}" class="img-mini" style="margin-bottom:10px;"> <strong>${item.name}</strong>
-                <hr>
-                <p><strong>Title:</strong> <button class="copy-btn" onclick="cp('${data.title.replace(/'/g,"")}')">Salin</button><br>${data.title}</p>
-                <p><strong>Description:</strong> <button class="copy-btn" onclick="cp('${data.desc.replace(/'/g,"")}')">Salin</button><br>${data.desc}</p>
-                <p><strong>Keywords (${count}):</strong> <button class="copy-btn" onclick="cp('${data.keywords}')">Salin</button><br><span style="font-size:12px;">${data.keywords}</span></p>
+                <img src="${item.preview}" class="img-mini"> <strong>${item.name}</strong>
+                <p><strong>Title:</strong> <button class="copy-btn" onclick="cp(this, '${data.title.replace(/'/g,"")}')">Salin Judul</button><br>${data.title}</p>
+                <p><strong>Description:</strong> <button class="copy-btn" onclick="cp(this, '${data.desc.replace(/'/g,"")}')">Salin Deskripsi</button><br>${data.desc}</p>
+                <p><strong>Keywords (${count}):</strong> <button class="copy-btn" onclick="cp(this, '${data.keywords}')">Salin Keywords</button><br><span style="font-size:12px;">${data.keywords}</span></p>
             </div>
         `;
-        container.innerHTML += html;
     }
 
-    function cp(txt) {
+    function cp(btn, txt) {
         navigator.clipboard.writeText(txt);
-        alert("Tersalin!");
+        btn.innerText = "✓ OK";
+        setTimeout(() => btn.innerText = "Salin", 1500);
     }
 </script>
 
