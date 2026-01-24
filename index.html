@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Metadata V11 - Future Proof</title>
+    <title>AI Metadata V8 - Pure Video SEO</title>
     <style>
-        :root { --primary: #4f46e5; --success: #10b981; --error: #ef4444; --dark: #0f172a; --bg: #f1f5f9; }
+        :root { --primary: #4f46e5; --success: #10b981; --dark: #0f172a; --bg: #f1f5f9; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #334155; }
         .container { max-width: 950px; margin: auto; background: white; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); overflow: hidden; }
         
@@ -39,7 +39,7 @@
         .field-label { font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-top: 18px; display: block; letter-spacing: 0.8px; }
         
         .copy-wrapper { display: flex; align-items: center; gap: 12px; background: #f8fafc; padding: 12px 15px; border-radius: 8px; border: 1px solid #e2e8f0; margin-top: 6px; }
-        .field-val { font-size: 14px; color: #1e293b; flex-grow: 1; font-family: 'Segoe UI', sans-serif; line-height: 1.5; text-align: justify; }
+        .field-val { font-size: 14px; color: #1e293b; flex-grow: 1; font-family: 'Segoe UI', sans-serif; line-height: 1.5; }
         
         .btn-copy { background: #e2e8f0; color: #475569; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; white-space: nowrap; }
         .btn-copy:hover { background: #cbd5e1; color: #0f172a; }
@@ -53,55 +53,32 @@
         .btn-gray { background: #64748b; color: white; }
         .btn:disabled { background: #cbd5e1; cursor: not-allowed; transform: none; box-shadow: none; }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; table-layout: fixed; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: left; font-size: 14px; }
         .img-mini { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0; }
         
-        .status-badge { padding: 5px 12px; border-radius: 20px; font-size: 10px; font-weight: bold; text-transform: uppercase; display: inline-block; }
+        .status-badge { padding: 5px 12px; border-radius: 20px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
         .s-ready { background: #f1f5f9; color: #64748b; }
         .s-run { background: #e0e7ff; color: #4338ca; animation: pulse 1s infinite; }
         .s-done { background: #d1fae5; color: #065f46; }
-        .s-fail { background: #fee2e2; color: #b91c1c; font-size: 9px; white-space: normal; line-height: 1.2; padding: 8px; border-radius: 4px; display:block; margin-top:5px;}
         @keyframes pulse { 50% { opacity: 0.6; } }
-
-        .help-link { color: var(--primary); text-decoration: none; font-weight: 600; font-size: 13px; display: inline-block; }
-        .help-link:hover { text-decoration: underline; }
-        .input-group { margin-bottom: 15px; }
-        .input-group label { display: block; font-size: 12px; font-weight: bold; color: #64748b; margin-bottom: 5px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="tabs">
-        <button class="tab-btn active" id="t0">1. SETUP</button>
+        <button class="tab-btn active" id="t0">1. API KEY</button>
         <button class="tab-btn" id="t1">2. UPLOAD</button>
         <button class="tab-btn" id="t2">3. PROSES</button>
         <button class="tab-btn" id="t3">4. HASIL</button>
     </div>
 
     <div id="c0" class="content active">
-        <h2 style="margin-top:0">⚙️ Setup API & Model</h2>
-        
-        <div style="background:#eef2ff; padding:15px; border-radius:8px; border:1px solid #c7d2fe; margin-bottom:20px;">
-            <p style="margin:0; font-size:13px; color:#3730a3;">
-                ℹ️ <strong>Tips Anti-Error:</strong> Jika status "Decommissioned", ganti nama Model di bawah dengan nama baru dari: 
-                <a href="https://console.groq.com/docs/models" target="_blank" class="help-link">Daftar Model Groq</a>
-            </p>
-        </div>
-
-        <div class="input-group">
-            <label>API KEY (Wajib)</label>
-            <input type="password" id="apiKey" placeholder="gsk_xxxxxxxxxxxxxxxx" style="width:100%; padding:14px; border:1px solid #cbd5e1; border-radius:8px; font-size:16px; box-sizing: border-box;">
-        </div>
-
-        <div class="input-group">
-            <label>MODEL ID (Bisa Diedit Manual - Cek link di atas untuk nama terbaru)</label>
-            <input type="text" id="modelId" value="llama-3.2-11b-vision-preview" placeholder="Contoh: llama-3.2-11b-vision-preview" style="width:100%; padding:14px; border:1px solid #cbd5e1; border-radius:8px; font-size:16px; box-sizing: border-box; font-family: monospace; color:#334155;">
-            <div style="font-size:11px; color:#94a3b8; margin-top:5px;">Jika gagal, coba ganti ke: <b>llama-3.2-90b-vision-preview</b> (jika sudah aktif lagi) atau cek Console Groq.</div>
-        </div>
-
-        <button class="btn btn-blue" onclick="saveKey()">Simpan Konfigurasi</button>
+        <h2 style="margin-top:0">🔑 Setup API</h2>
+        <p style="color:#64748b; font-size:14px; margin-bottom:20px;">Masukkan API Key Groq Anda untuk memulai.</p>
+        <input type="password" id="apiKey" placeholder="gsk_xxxxxxxxxxxxxxxx" style="width:100%; padding:16px; border:1px solid #cbd5e1; border-radius:8px; font-size:16px;">
+        <button class="btn btn-blue" onclick="saveKey()">Simpan & Lanjut</button>
     </div>
 
     <div id="c1" class="content">
@@ -109,7 +86,8 @@
         <div id="dropArea" class="drop-zone">
             <span style="font-size:40px;">🎬</span><br>
             <strong style="font-size:18px; display:block; margin-top:10px;">Drag & Drop File Di Sini</strong>
-            <span style="font-size:13px; color:#94a3b8">Unlimited Upload. Paste (CTRL+V) Ready.</span>
+            <span style="font-size:13px; color:#94a3b8">atau <strong>CTRL+V</strong> untuk Paste Gambar</span>
+            <p>Sistem akan menganggap ini sebagai VIDEO FOOTAGE</p>
             <input type="file" id="fileInput" multiple accept="image/*" style="display:none" onchange="handleFiles(this.files)">
         </div>
         <div id="fileStatus" style="margin-top:20px; text-align:center; font-weight:bold; color:var(--success);"></div>
@@ -119,14 +97,10 @@
     <div id="c2" class="content">
         <h2 style="margin-top:0">⚡ AI Video Processing</h2>
         <button class="btn btn-blue" id="btnStart" onclick="startProcessing()">🚀 Mulai Generate Metadata</button>
-        <div style="max-height: 400px; overflow-y: auto; margin-top: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
-            <table style="margin-top:0;">
-                <thead style="position: sticky; top: 0; background: white; z-index: 1;">
-                    <tr><th style="width:60px">Img</th><th>File</th><th style="width:140px">Status</th></tr>
-                </thead>
-                <tbody id="queueList"></tbody>
-            </table>
-        </div>
+        <table>
+            <thead><tr><th>Preview</th><th>File</th><th>Status</th></tr></thead>
+            <tbody id="queueList"></tbody>
+        </table>
     </div>
 
     <div id="c3" class="content">
@@ -164,18 +138,18 @@
         if(files.length > 0) { goToTab(1); handleFiles(files); }
     });
 
-    // --- SYSTEM PROMPT ---
+    // --- LOGIKA UTAMA V8 (PURE VIDEO SEO) ---
     const SYSTEM_PROMPT = `
-    Role: Senior Metadata Specialist for Microstock Video (Shutterstock, Adobe Stock).
-    Task: Analyze the image frame and generate metadata for a video clip.
-    
-    CRITICAL RULES:
-    1. TITLE: Simple, descriptive, visually accurate.
-    2. DESCRIPTION: Must be 50-100 words. Explain action, subject, lighting, context.
-    3. KEYWORDS: Single words ONLY. Split all phrases. Exclude: vector, photo, illustration.
-       Include: footage, video, clip, motion, render.
-    
-    Output JSON: {"title": "...", "description": "...", "keywords": "..."}
+    Role: Senior Metadata Specialist for US Microstock Video (Shutterstock, Adobe Stock, Pond5).
+    Task: Create metadata for VIDEO FOOTAGE assets based on the provided image frame.
+
+    CRITICAL KEYWORD RULES (STRICT):
+    1. **BANNED WORDS**: Do NOT use: vector, image, photo, picture, jpg, png, ai, eps, illustration (unless describing art style, but prefer 'graphic').
+    2. **VIDEO FOCUS**: Use terms like: footage, animation, clip, motion, loop, render, background, overlay, effect.
+    3. **SINGLE WORDS**: Split all phrases. "Film burn" -> "film", "burn".
+    4. **QUANTITY**: Aim for maximum relevance. The system will handle the count, but provide at least 30 rich keywords.
+
+    JSON Output: {"title": "...", "description": "...", "keywords": "word1, word2, ..."}
     `;
 
     function goToTab(idx) {
@@ -185,35 +159,21 @@
 
     function saveKey() {
         const k = document.getElementById('apiKey').value.trim();
-        const m = document.getElementById('modelId').value.trim();
-        
-        if(!k.startsWith('gsk_')) return alert("API Key Salah! Harus berawalan gsk_");
-        if(m.length < 5) return alert("Nama Model tidak valid!");
-
-        localStorage.setItem('GROQ_KEY_V11', k);
-        localStorage.setItem('GROQ_MODEL_V11', m);
-        
-        goToTab(1);
+        if(k.startsWith('gsk_')) { localStorage.setItem('GROQ_V8_KEY', k); goToTab(1); } else alert("API Key Salah!");
     }
-
-    // Auto load key & model
-    if(localStorage.getItem('GROQ_KEY_V11')) document.getElementById('apiKey').value = localStorage.getItem('GROQ_KEY_V11');
-    else if(localStorage.getItem('GROQ_KEY_V10')) document.getElementById('apiKey').value = localStorage.getItem('GROQ_KEY_V10'); // Fallback
-
-    if(localStorage.getItem('GROQ_MODEL_V11')) document.getElementById('modelId').value = localStorage.getItem('GROQ_MODEL_V11');
+    if(localStorage.getItem('GROQ_V8_KEY')) document.getElementById('apiKey').value = localStorage.getItem('GROQ_V8_KEY');
 
     async function handleFiles(files) {
         if (files.length === 0) return;
-        const startId = queue.length;
-        document.getElementById('fileStatus').innerText = `Menambahkan ${files.length} file...`;
-        
+        queue = [];
+        document.getElementById('queueList').innerHTML = "";
+        document.getElementById('fileStatus').innerText = "Memproses preview...";
         for (let i = 0; i < files.length; i++) {
-            const currentId = startId + i;
             const c = await compressImage(files[i]);
-            queue.push({ id: currentId, name: files[i].name, base64: c.data, preview: c.preview });
-            document.getElementById('queueList').innerHTML += `<tr><td><img src="${c.preview}" class="img-mini"></td><td>${files[i].name}</td><td id="status-${currentId}"><span class="status-badge s-ready">Ready</span></td></tr>`;
+            queue.push({ id: i, name: files[i].name, base64: c.data, preview: c.preview });
+            document.getElementById('queueList').innerHTML += `<tr><td><img src="${c.preview}" class="img-mini"></td><td>${files[i].name}</td><td id="status-${i}"><span class="status-badge s-ready">Ready</span></td></tr>`;
         }
-        document.getElementById('fileStatus').innerText = `${queue.length} File Siap!`;
+        document.getElementById('fileStatus').innerText = `${files.length} File Siap!`;
         document.getElementById('btnNext').style.display = 'block';
     }
 
@@ -227,104 +187,151 @@
                     const scl = 512 / Math.max(img.width, img.height);
                     cvs.width = img.width * scl; cvs.height = img.height * scl;
                     cvs.getContext('2d').drawImage(img, 0, 0, cvs.width, cvs.height);
-                    resolve({ data: cvs.toDataURL('image/jpeg', 0.6).split(',')[1], preview: e.target.result });
+                    resolve({ data: cvs.toDataURL('image/jpeg', 0.7).split(',')[1], preview: e.target.result });
                 };
             };
         });
     }
 
     async function startProcessing() {
-        const k = localStorage.getItem('GROQ_KEY_V11');
-        // AMBIL MODEL DARI INPUTAN USER (BUKAN HARDCODE)
-        const modelName = localStorage.getItem('GROQ_MODEL_V11') || document.getElementById('modelId').value;
-        
-        if(!k) { alert("API Key Kosong!"); goToTab(0); return; }
-
+        const k = localStorage.getItem('GROQ_V8_KEY');
         document.getElementById('btnStart').disabled = true;
-        document.getElementById('btnStart').innerText = `Generate pakai ${modelName}...`;
+        document.getElementById('btnStart').innerText = "Sedang Generate Metadata...";
         results = [];
 
         for (let item of queue) {
-            const statusEl = document.getElementById(`status-${item.id}`);
-            if(statusEl.innerHTML.includes('Done')) continue;
-
-            statusEl.innerHTML = `<span class="status-badge s-run">Working...</span>`;
-            
+            document.getElementById(`status-${item.id}`).innerHTML = `<span class="status-badge s-run">Working...</span>`;
             try {
                 const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                     method: "POST", headers: { "Authorization": `Bearer ${k}`, "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        model: modelName, // <-- MODEL DINAMIS
+                        model: "meta-llama/llama-4-scout-17b-16e-instruct",
                         messages: [
                             { role: "system", content: SYSTEM_PROMPT },
-                            { role: "user", content: [{ type: "text", text: `Video metadata for: ${item.name}` }, { type: "image_url", image_url: { url: `data:image/jpeg;base64,${item.base64}` } }] }
+                            { role: "user", content: [{ type: "text", text: `Analyze for video metadata: ${item.name}` }, { type: "image_url", image_url: { url: `data:image/jpeg;base64,${item.base64}` } }] }
                         ], temperature: 0.1, response_format: { type: "json_object" }
                     })
                 });
-
-                if(!res.ok) {
-                    const errData = await res.json();
-                    throw new Error(errData.error?.message || `HTTP ${res.status}`);
-                }
-                
                 const json = await res.json();
                 const content = JSON.parse(json.choices[0].message.content);
                 const finalData = processKeywords(content);
-                
                 results.push({ filename: item.name, ...finalData });
                 renderResult(item, finalData);
-                statusEl.innerHTML = `<span class="status-badge s-done">Done</span>`;
+                document.getElementById(`status-${item.id}`).innerHTML = `<span class="status-badge s-done">Done</span>`;
             } catch (e) {
                 console.error(e);
-                let errMsg = e.message;
-                if(errMsg.includes('401')) errMsg = "API Key Salah";
-                if(errMsg.includes('404')) errMsg = `Model "${modelName}" Salah/Mati. Cek Tab Setup.`;
-                if(errMsg.includes('400')) errMsg = `Model "${modelName}" tidak support gambar.`;
-                if(errMsg.includes('429')) errMsg = "Limit Tercapai";
-                statusEl.innerHTML = `<span class="status-badge s-fail">Gagal: ${errMsg}</span>`;
+                document.getElementById(`status-${item.id}`).innerHTML = `<span style="color:red; font-size:10px;">Error</span>`;
             }
-            await new Promise(r => setTimeout(r, 2000));
+            await new Promise(r => setTimeout(r, 1000));
         }
         document.getElementById('btnStart').disabled = false;
         document.getElementById('btnStart').innerText = "🚀 Mulai Generate";
-        if(results.length > 0) goToTab(3);
+        goToTab(3);
     }
 
+    // --- SMART KEYWORD PROCESSOR (THE CORE OF V8) ---
     function processKeywords(data) {
-        let kw = (Array.isArray(data.keywords) ? data.keywords.join(' ') : data.keywords)
-            .toLowerCase().replace(/[^a-z0-9\s,]/g, '').replace(/[,\s]+/g, ' ').split(' ').map(k=>k.trim()).filter(k=>k.length>2);
-        
-        const banned = ['vector', 'image', 'photo', 'picture', 'jpg', 'png', 'illustration'];
+        // 1. Pecah frasa & bersihkan
+        let kwRaw = (Array.isArray(data.keywords) ? data.keywords.join(' ') : data.keywords);
+        let kw = kwRaw.toLowerCase()
+            .replace(/[^a-z0-9\s,]/g, '')
+            .replace(/[,\s]+/g, ' ')
+            .split(' ')
+            .map(k => k.trim())
+            .filter(k => k.length > 2); // Hapus kata < 3 huruf
+
+        // 2. BLACKLIST FILTER (Hapus kata 'haram' untuk video)
+        const banned = ['vector', 'image', 'photo', 'picture', 'jpg', 'png', 'jpeg', 'eps', 'ai', 'svg', 'download'];
         kw = kw.filter(w => !banned.includes(w));
-        const tags = ['footage', 'video', 'clip', 'motion', 'loop', 'render', '4k', 'hd'];
-        tags.forEach(t => { if(!kw.includes(t)) kw.push(t); });
+
+        // 3. MANDATORY VIDEO TAGS (Wajib ada)
+        const videoTags = ['animation', 'footage', 'video', 'clip', 'motion', 'loop', 'background', 'overlay', 'render', 'graphic', 'hd', 'digital'];
+        videoTags.forEach(t => { if(!kw.includes(t)) kw.push(t); });
+
+        // 4. HIGH VALUE FILLERS (Jika kurang dari 39)
+        const fillers = [
+            'creative', 'modern', 'abstract', 'art', 'design', 'concept', 'backdrop', 
+            'effect', 'media', 'technology', 'internet', 'broadcast', 'screen', 'display',
+            'show', 'online', 'web', 'app', 'business', 'presentation', 'corporate', 'dynamic'
+        ];
         
-        return { title: data.title, description: data.description, keywords: kw.slice(0, 50).join(', ') };
+        // Hapus duplikat dulu sebelum nambah filler
+        kw = [...new Set(kw)];
+
+        let i = 0;
+        while (kw.length < 39 && i < fillers.length) {
+            if (!kw.includes(fillers[i])) kw.push(fillers[i]);
+            i++;
+        }
+
+        // 5. CAP AT 42 (Potong jika kelebihan)
+        if (kw.length > 42) kw = kw.slice(0, 42);
+
+        return {
+            title: data.title,
+            description: data.description,
+            keywords: kw.join(', ')
+        };
     }
 
     function renderResult(item, data) {
+        const count = data.keywords.split(',').length;
         const div = document.createElement('div');
         div.className = 'result-card';
         div.innerHTML = `
-            <div style="display:flex; gap:15px; margin-bottom:15px;"><img src="${item.preview}" class="img-mini"><strong>${item.name}</strong></div>
-            <span class="field-label">TITLE</span><div class="copy-wrapper"><div class="field-val" id="t-${item.id}">${data.title}</div><button class="btn-copy" onclick="copyText(this, 't-${item.id}')">Copy</button></div>
-            <span class="field-label">DESC</span><div class="copy-wrapper"><div class="field-val" id="d-${item.id}">${data.description}</div><button class="btn-copy" onclick="copyText(this, 'd-${item.id}')">Copy</button></div>
-            <span class="field-label">KW</span><div class="copy-wrapper"><div class="field-val" id="k-${item.id}">${data.keywords}</div><button class="btn-copy" onclick="copyText(this, 'k-${item.id}')">Copy</button></div>
+            <div style="display:flex; gap:15px; align-items:center; border-bottom:1px solid #f1f5f9; padding-bottom:15px; margin-bottom:15px;">
+                <img src="${item.preview}" class="img-mini">
+                <div>
+                    <strong style="font-size:16px;">${item.name}</strong><br>
+                    <span style="font-size:12px; color:${count >= 39 && count <= 42 ? '#059669' : '#ca8a04'}">
+                        ● ${count} Keywords (Target: 39-42)
+                    </span>
+                </div>
+            </div>
+            
+            <span class="field-label">TITLE (Visual Honest)</span>
+            <div class="copy-wrapper">
+                <div class="field-val" id="t-${item.id}">${data.title}</div>
+                <button class="btn-copy" onclick="copyText(this, 't-${item.id}')">Copy</button>
+            </div>
+
+            <span class="field-label">DESCRIPTION (Video Usage)</span>
+            <div class="copy-wrapper">
+                <div class="field-val" id="d-${item.id}">${data.description}</div>
+                <button class="btn-copy" onclick="copyText(this, 'd-${item.id}')">Copy</button>
+            </div>
+
+            <span class="field-label">KEYWORDS (Video SEO Only - No Vector/Image)</span>
+            <div class="copy-wrapper">
+                <div class="field-val" id="k-${item.id}">${data.keywords}</div>
+                <button class="btn-copy" onclick="copyText(this, 'k-${item.id}')">Copy</button>
+            </div>
         `;
         document.getElementById('resultContainer').appendChild(div);
     }
 
     function copyText(btn, id) {
-        navigator.clipboard.writeText(document.getElementById(id).innerText).then(() => {
-            btn.innerText = "Copied!"; setTimeout(()=>btn.innerText="Copy",1000);
-        });
+        const txt = document.getElementById(id).innerText;
+        const doCopy = () => {
+            btn.innerText = "Copied!"; btn.classList.add('copied');
+            setTimeout(() => { btn.innerText = "Copy"; btn.classList.remove('copied'); }, 1500);
+        };
+        if(navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(txt).then(doCopy);
+        else {
+            const ta = document.createElement("textarea");
+            ta.value = txt; ta.style.position="fixed"; document.body.appendChild(ta); ta.select();
+            try { document.execCommand('copy'); doCopy(); } catch(e){}
+            document.body.removeChild(ta);
+        }
     }
 
     function resetAll() {
         queue = []; results = [];
         document.getElementById('queueList').innerHTML = "";
         document.getElementById('resultContainer').innerHTML = "";
+        document.getElementById('fileStatus').innerText = "";
         document.getElementById('btnNext').style.display = 'none';
+        document.getElementById('fileInput').value = "";
         goToTab(1);
     }
 
@@ -332,7 +339,10 @@
         if(!results.length) return alert("Belum ada data!");
         let csv = "Filename,Title,Description,Keywords\n";
         results.forEach(r => csv += `"${r.filename}","${r.title.replace(/"/g,'""')}","${r.description.replace(/"/g,'""')}","${r.keywords}"\n`);
-        const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], {type:"text/csv"})); a.download = `Meta_${Date.now()}.csv`; a.click();
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(new Blob([csv], {type:"text/csv"}));
+        a.download = `Metadata_Video_V8_${Date.now()}.csv`;
+        a.click();
     }
 </script>
 </body>
