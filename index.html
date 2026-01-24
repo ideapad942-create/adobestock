@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Metadata V8 - Pure Video SEO</title>
+    <title>AI Metadata V8.1 - Fix Copy Button</title>
     <style>
         :root { --primary: #4f46e5; --success: #10b981; --dark: #0f172a; --bg: #f1f5f9; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #334155; }
@@ -195,6 +195,8 @@
 
     async function startProcessing() {
         const k = localStorage.getItem('GROQ_V8_KEY');
+        if(!k) return alert("API Key belum diset!");
+
         document.getElementById('btnStart').disabled = true;
         document.getElementById('btnStart').innerText = "Sedang Generate Metadata...";
         results = [];
@@ -213,6 +215,8 @@
                     })
                 });
                 const json = await res.json();
+                if(json.error) throw new Error(json.error.message);
+                
                 const content = JSON.parse(json.choices[0].message.content);
                 const finalData = processKeywords(content);
                 results.push({ filename: item.name, ...finalData });
@@ -231,47 +235,37 @@
 
     // --- SMART KEYWORD PROCESSOR (THE CORE OF V8) ---
     function processKeywords(data) {
-        // 1. Pecah frasa & bersihkan
         let kwRaw = (Array.isArray(data.keywords) ? data.keywords.join(' ') : data.keywords);
         let kw = kwRaw.toLowerCase()
             .replace(/[^a-z0-9\s,]/g, '')
             .replace(/[,\s]+/g, ' ')
             .split(' ')
             .map(k => k.trim())
-            .filter(k => k.length > 2); // Hapus kata < 3 huruf
+            .filter(k => k.length > 2);
 
-        // 2. BLACKLIST FILTER (Hapus kata 'haram' untuk video)
+        // BLACKLIST & MANDATORY
         const banned = ['vector', 'image', 'photo', 'picture', 'jpg', 'png', 'jpeg', 'eps', 'ai', 'svg', 'download'];
         kw = kw.filter(w => !banned.includes(w));
 
-        // 3. MANDATORY VIDEO TAGS (Wajib ada)
         const videoTags = ['animation', 'footage', 'video', 'clip', 'motion', 'loop', 'background', 'overlay', 'render', 'graphic', 'hd', 'digital'];
         videoTags.forEach(t => { if(!kw.includes(t)) kw.push(t); });
 
-        // 4. HIGH VALUE FILLERS (Jika kurang dari 39)
+        // FILLER
         const fillers = [
             'creative', 'modern', 'abstract', 'art', 'design', 'concept', 'backdrop', 
             'effect', 'media', 'technology', 'internet', 'broadcast', 'screen', 'display',
             'show', 'online', 'web', 'app', 'business', 'presentation', 'corporate', 'dynamic'
         ];
         
-        // Hapus duplikat dulu sebelum nambah filler
         kw = [...new Set(kw)];
-
         let i = 0;
         while (kw.length < 39 && i < fillers.length) {
             if (!kw.includes(fillers[i])) kw.push(fillers[i]);
             i++;
         }
-
-        // 5. CAP AT 42 (Potong jika kelebihan)
         if (kw.length > 42) kw = kw.slice(0, 42);
 
-        return {
-            title: data.title,
-            description: data.description,
-            keywords: kw.join(', ')
-        };
+        return { title: data.title, description: data.description, keywords: kw.join(', ') };
     }
 
     function renderResult(item, data) {
@@ -301,7 +295,7 @@
                 <button class="btn-copy" onclick="copyText(this, 'd-${item.id}')">Copy</button>
             </div>
 
-            <span class="field-label">KEYWORDS (Video SEO Only - No Vector/Image)</span>
+            <span class="field-label">KEYWORDS (Video SEO)</span>
             <div class="copy-wrapper">
                 <div class="field-val" id="k-${item.id}">${data.keywords}</div>
                 <button class="btn-copy" onclick="copyText(this, 'k-${item.id}')">Copy</button>
@@ -310,19 +304,37 @@
         document.getElementById('resultContainer').appendChild(div);
     }
 
+    // --- FIX UTAMA: MANUAL COPY FALLBACK ---
     function copyText(btn, id) {
         const txt = document.getElementById(id).innerText;
-        const doCopy = () => {
-            btn.innerText = "Copied!"; btn.classList.add('copied');
+        
+        // Fungsi sukses
+        const success = () => {
+            btn.innerText = "Copied!";
+            btn.classList.add('copied');
             setTimeout(() => { btn.innerText = "Copy"; btn.classList.remove('copied'); }, 1500);
         };
-        if(navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(txt).then(doCopy);
-        else {
-            const ta = document.createElement("textarea");
-            ta.value = txt; ta.style.position="fixed"; document.body.appendChild(ta); ta.select();
-            try { document.execCommand('copy'); doCopy(); } catch(e){}
-            document.body.removeChild(ta);
+
+        // Bikin elemen Textarea sementara (Cara paling ampuh untuk local file)
+        const tempInput = document.createElement("textarea");
+        tempInput.style.position = "fixed";
+        tempInput.style.left = "-9999px"; // Sembunyikan dari pandangan
+        tempInput.style.top = "0";
+        tempInput.value = txt;
+        document.body.appendChild(tempInput);
+        
+        tempInput.focus();
+        tempInput.select();
+
+        try {
+            document.execCommand('copy');
+            success();
+        } catch (err) {
+            console.error('Copy gagal', err);
+            alert('Browser memblokir copy otomatis. Silakan seleksi teks manual.');
         }
+
+        document.body.removeChild(tempInput);
     }
 
     function resetAll() {
