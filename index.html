@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MALES MIKIR - Video SEO V8</title>
+    <title>MALES MIKIR - Video SEO V8.1</title>
     <style>
-        :root { --primary: #4f46e5; --success: #10b981; --dark: #0f172a; --bg: #f1f5f9; }
+        :root { --primary: #4f46e5; --success: #10b981; --dark: #0f172a; --bg: #f1f5f9; --error: #ef4444; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #334155; }
         .container { max-width: 900px; margin: auto; background: white; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); overflow: hidden; }
         
@@ -30,6 +30,7 @@
 
         .btn { width: 100%; padding: 15px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 15px; font-size: 14px; }
         .btn-blue { background: var(--primary); color: white; }
+        .btn-blue:disabled { background: #94a3b8; cursor: not-allowed; }
 
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th, td { padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: left; font-size: 13px; }
@@ -42,6 +43,7 @@
         .status-badge { padding: 4px 10px; border-radius: 15px; font-size: 9px; font-weight: bold; text-transform: uppercase; }
         .s-run { background: #e0e7ff; color: #4338ca; animation: blink 1s infinite; }
         .s-done { background: #d1fae5; color: #065f46; }
+        .s-err { background: #fee2e2; color: #ef4444; }
         @keyframes blink { 50% { opacity: 0.5; } }
     </style>
 </head>
@@ -65,11 +67,10 @@
     </div>
 
     <div id="c1" class="content">
-        <h2>📁 Upload Asset @Bangjeyy</h2>
+        <h2>📁 Upload @Bangjeyy</h2>
         <div id="dropArea" class="drop-zone">
             <span style="font-size:35px;">🎬</span><br>
-            <strong>Tarik Foto/Frame Video ke Sini</strong>
-            <p style="font-size:12px; color:#94a3b8;">Multiple upload didukung</p>
+            <strong>Tarik Frame Video ke Sini</strong>
             <input type="file" id="fileInput" multiple accept="image/*" style="display:none" onchange="handleFiles(this.files)">
         </div>
         <div id="fileStatus" style="margin-top:15px; text-align:center; font-weight:bold; color:var(--success);"></div>
@@ -77,8 +78,7 @@
     </div>
 
     <div id="c2" class="content">
-        <h2>⚡ High-Quality Video Processing</h2>
-        <p style="font-size:12px; color:#64748b;">Proses ini menggunakan jeda waktu agar AI memberikan deskripsi video yang maksimal.</p>
+        <h2>⚡ Video SEO Processing</h2>
         <button class="btn btn-blue" id="btnStart" onclick="startProcessing()">🚀 Mulai Generate Metadata</button>
         <table>
             <thead><tr><th>Preview</th><th>File</th><th>Status</th></tr></thead>
@@ -111,19 +111,17 @@
     dropArea.addEventListener('drop', (e) => handleFiles(e.dataTransfer.files));
     dropArea.addEventListener('click', () => document.getElementById('fileInput').click());
 
-    // SYSTEM PROMPT DIOPTIMALKAN UNTUK VIDEO
     const SYSTEM_PROMPT = `
-    Role: Professional Video Metadata & SEO Specialist for US Microstock Markets.
-    Project Name: MALES MIKIR.
+    You are a Microstock Video Metadata Expert. 
+    Output ONLY a valid JSON object.
     
-    CRITICAL INSTRUCTIONS:
-    1. ASSET TYPE: This is a VIDEO FOOTAGE/CLIP. Never use words like 'photo', 'image', 'picture', or 'still'.
-    2. VIDEO TERMINOLOGY: Use words like 'movement', 'cinematic', 'footage', 'shot', 'lighting', 'motion'.
-    3. TITLE: Descriptive but clean. MUST BE AT LEAST 5 WORDS.
-    4. DESCRIPTION: Professional storytelling related to the title. Length: 35-100 words. Focus on movement and cinematic quality.
-    5. KEYWORDS: 50 single words. NO "and", "the", "with", "for". NO numbers. NO resolutions. NO file formats.
+    RULES:
+    1. This is VIDEO FOOTAGE. Do not mention "photo" or "image".
+    2. TITLE: Honest visual description. MIN 5 WORDS.
+    3. DESCRIPTION: Detailed storyteller related to the title. 35-100 words. Focus on movement.
+    4. KEYWORDS: 50 single words. NO "and", "the", "with". NO resolutions (4k). NO numbers.
     
-    Output ONLY valid JSON: {"title": "...", "description": "...", "keywords": "..."}
+    JSON Format: {"title": "...", "description": "...", "keywords": "..."}
     `;
 
     function goToTab(idx) {
@@ -168,7 +166,9 @@
     async function startProcessing() {
         const k = localStorage.getItem('GROQ_V8_KEY');
         const btn = document.getElementById('btnStart');
-        btn.disabled = true; btn.innerText = "HQ Processing...";
+        if(!k) return alert("Isi API Key dulu Bang!");
+        
+        btn.disabled = true; btn.innerText = "Processing Asset...";
 
         for (let item of queue) {
             if (item.processed) continue;
@@ -176,46 +176,62 @@
             statusEl.innerHTML = `<span class="status-badge s-run">Working...</span>`;
             
             try {
-                const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                    method: "POST", headers: { "Authorization": `Bearer ${k}`, "Content-Type": "application/json" },
+                const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                    method: "POST", 
+                    headers: { "Authorization": `Bearer ${k}`, "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        model: "meta-llama/llama-4-scout-17b-16e-instruct",
+                        model: "llama-3.2-11b-vision-preview", // Menggunakan model vision paling stabil
                         messages: [
                             { role: "system", content: SYSTEM_PROMPT },
-                            { role: "user", content: [{ type: "text", text: "Create professional video metadata for this clip:" }, { type: "image_url", image_url: { url: `data:image/jpeg;base64,${item.base64}` } }] }
-                        ], temperature: 0.1, response_format: { type: "json_object" }
+                            { role: "user", content: [
+                                { type: "text", text: "Analyze this video clip and provide metadata in JSON." },
+                                { type: "image_url", image_url: { url: `data:image/jpeg;base64,${item.base64}` } }
+                            ]}
+                        ], 
+                        temperature: 0.1, 
+                        response_format: { type: "json_object" }
                     })
                 });
-                const json = await res.json();
-                const content = JSON.parse(json.choices[0].message.content);
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error?.message || `HTTP ${response.status}`);
+                }
+
+                const content = JSON.parse(data.choices[0].message.content);
                 const finalData = cleanSEO(content);
                 
                 results.push({ filename: item.name, ...finalData });
                 renderResult(item, finalData);
                 statusEl.innerHTML = `<span class="status-badge s-done">DONE</span>`;
                 item.processed = true;
-            } catch (e) { statusEl.innerHTML = `<span style="color:red">Error</span>`; }
-            
-            // JEDA WAKTU SESUAI PERMINTAAN (2 DETIK) AGAR HASIL MAKSIMAL & STABIL
+
+            } catch (e) { 
+                console.error(e);
+                statusEl.innerHTML = `<span class="status-badge s-err" title="${e.message}">ERROR</span><div style="font-size:8px; color:red;">${e.message.substring(0,20)}...</div>`;
+            }
+            // Jeda 2 detik agar AI tidak pusing
             await new Promise(r => setTimeout(r, 2000)); 
         }
-        btn.disabled = false; btn.innerText = "🚀 Mulai Generate"; goToTab(3);
+        btn.disabled = false; btn.innerText = "🚀 Mulai Generate"; 
+        if(results.length > 0) goToTab(3);
     }
 
     function cleanSEO(data) {
-        const junk = ['and', 'the', 'with', 'for', 'from', 'this', 'that', 'into', 'upon', 'then', 'than', 'image', 'photo', 'picture'];
-        const banned = ['4k', '8k', 'hd', 'uhd', 'vector', 'jpg', 'png', 'jpeg', 'eps', 'ai', 'svg', 'illustration', 'fps'];
+        const junk = ['and', 'the', 'with', 'for', 'from', 'image', 'photo', 'picture', 'still'];
+        const banned = ['4k', '8k', 'hd', 'vector', 'jpg', 'png', 'jpeg', 'eps', 'ai', 'svg', 'illustration', 'fps'];
         
         let kw = data.keywords.toLowerCase().replace(/[^a-z\s]/g, ' ').split(/\s+/);
         let clean = [...new Set(kw)].filter(w => w.length > 2 && !junk.includes(w) && !banned.includes(w) && !/\d/.test(w));
 
-        const fillers = ['footage', 'animation', 'motion', 'loop', 'video', 'render', 'background', 'overlay', 'effect', 'cinematic', 'broadcast'];
+        const fillers = ['footage', 'animation', 'motion', 'loop', 'video', 'render', 'background', 'overlay', 'effect', 'cinematic'];
         fillers.forEach(f => { if (clean.length < 41 && !clean.includes(f)) clean.push(f); });
 
         if (clean.length > 42) clean = clean.slice(0, 42);
         while (clean.length < 39) clean.push(['modern', 'abstract', 'creative', 'digital', 'professional'][Math.floor(Math.random()*5)]);
 
-        return { title: data.title, description: data.description, keywords: [...new Set(clean)].join(', ') };
+        return { title: data.title, description: data.description, keywords: clean.join(', ') };
     }
 
     function renderResult(item, data) {
@@ -224,13 +240,13 @@
         div.innerHTML = `
             <div style="display:flex; gap:10px; align-items:center; border-bottom:1px solid #eee; padding-bottom:5px;">
                 <img src="${item.preview}" class="img-mini">
-                <strong style="font-size:13px;">${item.name}</strong>
+                <strong style="font-size:12px;">${item.name}</strong>
             </div>
-            <span class="field-label">VIDEO TITLE (SEO Ready)</span>
+            <span class="field-label">VIDEO TITLE (Min 5 Words)</span>
             <div class="copy-wrapper"><div class="field-val" id="t-${item.id}">${data.title}</div><button class="btn-copy" onclick="copyText(this, 't-${item.id}')">Copy</button></div>
             <span class="field-label">FOOTAGE DESCRIPTION (35-100 Words)</span>
             <div class="copy-wrapper"><div class="field-val" id="d-${item.id}">${data.description}</div><button class="btn-copy" onclick="copyText(this, 'd-${item.id}')">Copy</button></div>
-            <span class="field-label">CLEAN KEYWORDS (${data.keywords.split(',').length} Single Words)</span>
+            <span class="field-label">CLEAN KEYWORDS (${data.keywords.split(',').length} Words)</span>
             <div class="copy-wrapper"><div class="field-val" id="k-${item.id}">${data.keywords}</div><button class="btn-copy" onclick="copyText(this, 'k-${item.id}')">Copy</button></div>
         `;
         document.getElementById('resultContainer').appendChild(div);
