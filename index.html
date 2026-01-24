@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Metadata V9.1 - Debug Mode</title>
+    <title>AI Metadata V10 - Stable Model</title>
     <style>
         :root { --primary: #4f46e5; --success: #10b981; --error: #ef4444; --dark: #0f172a; --bg: #f1f5f9; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #334155; }
@@ -61,7 +61,7 @@
         .s-ready { background: #f1f5f9; color: #64748b; }
         .s-run { background: #e0e7ff; color: #4338ca; animation: pulse 1s infinite; }
         .s-done { background: #d1fae5; color: #065f46; }
-        .s-fail { background: #fee2e2; color: #b91c1c; font-size: 9px; white-space: normal; line-height: 1.2; padding: 8px; }
+        .s-fail { background: #fee2e2; color: #b91c1c; font-size: 9px; white-space: normal; line-height: 1.2; padding: 8px; border-radius: 4px; }
         @keyframes pulse { 50% { opacity: 0.6; } }
 
         .help-link { color: var(--primary); text-decoration: none; font-weight: 600; font-size: 13px; margin-top: 10px; display: inline-block; }
@@ -94,7 +94,7 @@
         <h2 style="margin-top:0">📁 Upload Asset</h2>
         <div id="dropArea" class="drop-zone">
             <span style="font-size:40px;">🎬</span><br>
-            <strong style="font-size:18px; display:block; margin-top:10px;">Drag & Drop File Di Sini (Unlimited)</strong>
+            <strong style="font-size:18px; display:block; margin-top:10px;">Drag & Drop File Di Sini</strong>
             <span style="font-size:13px; color:#94a3b8">Bisa banyak foto sekaligus. <strong>CTRL+V</strong> juga bisa.</span>
             <input type="file" id="fileInput" multiple accept="image/*" style="display:none" onchange="handleFiles(this.files)">
         </div>
@@ -152,10 +152,16 @@
 
     // --- SYSTEM PROMPT ---
     const SYSTEM_PROMPT = `
-    Role: Metadata Specialist for US Microstock Video.
-    Task: Analyze image, generate video metadata.
-    Output JSON: {"title": "Simple Title", "description": "50-100 words description...", "keywords": "single, words, only"}
-    Rules: No vector/photo terms. Split phrases.
+    Role: Senior Metadata Specialist for Microstock Video.
+    Task: Analyze the image and generate metadata for a video clip.
+    
+    CRITICAL INSTRUCTIONS:
+    1. TITLE: Simple, direct, visually accurate.
+    2. DESCRIPTION: Must be 50-100 words. Describe action, lighting, context.
+    3. KEYWORDS: Single words only. Split all phrases. No vector/photo terms.
+       Include: footage, video, clip, motion, render.
+    
+    Output JSON: {"title": "...", "description": "...", "keywords": "..."}
     `;
 
     function goToTab(idx) {
@@ -165,9 +171,16 @@
 
     function saveKey() {
         const k = document.getElementById('apiKey').value.trim();
-        if(k.startsWith('gsk_')) { localStorage.setItem('GROQ_V9_KEY', k); goToTab(1); } else alert("API Key Salah! Harus berawalan gsk_");
+        if(k.startsWith('gsk_')) { localStorage.setItem('GROQ_KEY_V10', k); goToTab(1); } else alert("API Key Salah! Harus berawalan gsk_");
     }
-    if(localStorage.getItem('GROQ_V9_KEY')) document.getElementById('apiKey').value = localStorage.getItem('GROQ_V9_KEY');
+    // Auto load key if exists
+    if(localStorage.getItem('GROQ_KEY_V10')) document.getElementById('apiKey').value = localStorage.getItem('GROQ_KEY_V10');
+    // Fallback: Check older keys if V10 is empty
+    else if(localStorage.getItem('GROQ_V9_KEY')) {
+        const oldKey = localStorage.getItem('GROQ_V9_KEY');
+        localStorage.setItem('GROQ_KEY_V10', oldKey);
+        document.getElementById('apiKey').value = oldKey;
+    }
 
     async function handleFiles(files) {
         if (files.length === 0) return;
@@ -191,7 +204,8 @@
                 const img = new Image(); img.src = e.target.result;
                 img.onload = () => {
                     const cvs = document.createElement('canvas');
-                    const scl = 512 / Math.max(img.width, img.height); // Resize biar ringan
+                    // Resize to manageable size for API
+                    const scl = 512 / Math.max(img.width, img.height);
                     cvs.width = img.width * scl; cvs.height = img.height * scl;
                     cvs.getContext('2d').drawImage(img, 0, 0, cvs.width, cvs.height);
                     resolve({ data: cvs.toDataURL('image/jpeg', 0.6).split(',')[1], preview: e.target.result });
@@ -200,9 +214,8 @@
         });
     }
 
-    // --- FUNGSI UTAMA DENGAN DEBUG ERROR ---
     async function startProcessing() {
-        const k = localStorage.getItem('GROQ_V9_KEY');
+        const k = localStorage.getItem('GROQ_KEY_V10');
         if(!k) { alert("API Key Kosong!"); goToTab(0); return; }
 
         document.getElementById('btnStart').disabled = true;
@@ -216,11 +229,11 @@
             statusEl.innerHTML = `<span class="status-badge s-run">Working...</span>`;
             
             try {
-                // MODEL DIGANTI KE 11b AGAR LEBIH RINGAN
+                // FIXED: Menggunakan model 90b yang stabil (bukan 11b yang sudah mati)
                 const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                     method: "POST", headers: { "Authorization": `Bearer ${k}`, "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        model: "llama-3.2-11b-vision-preview", // <-- GANTI MODEL
+                        model: "llama-3.2-90b-vision-preview", 
                         messages: [
                             { role: "system", content: SYSTEM_PROMPT },
                             { role: "user", content: [{ type: "text", text: `Video metadata for: ${item.name}` }, { type: "image_url", image_url: { url: `data:image/jpeg;base64,${item.base64}` } }] }
@@ -242,13 +255,13 @@
                 statusEl.innerHTML = `<span class="status-badge s-done">Done</span>`;
             } catch (e) {
                 console.error(e);
-                // MENAMPILKAN PESAN ERROR ASLI
                 let errMsg = e.message;
                 if(errMsg.includes('401')) errMsg = "API Key Salah";
-                if(errMsg.includes('429')) errMsg = "Limit Tercapai";
+                if(errMsg.includes('429')) errMsg = "Limit Tercapai (Tunggu sebentar)";
                 statusEl.innerHTML = `<span class="status-badge s-fail">Gagal: ${errMsg}</span>`;
             }
-            await new Promise(r => setTimeout(r, 2000)); // Delay aman
+            // Delay penting untuk menghindari limit di model 90b
+            await new Promise(r => setTimeout(r, 2000));
         }
         document.getElementById('btnStart').disabled = false;
         document.getElementById('btnStart').innerText = "🚀 Mulai Generate";
@@ -261,7 +274,7 @@
         
         const banned = ['vector', 'image', 'photo', 'picture', 'jpg', 'png', 'illustration'];
         kw = kw.filter(w => !banned.includes(w));
-        const tags = ['footage', 'video', 'clip', 'motion', 'loop', 'render', '4k'];
+        const tags = ['footage', 'video', 'clip', 'motion', 'loop', 'render', '4k', 'hd'];
         tags.forEach(t => { if(!kw.includes(t)) kw.push(t); });
         
         return { title: data.title, description: data.description, keywords: kw.slice(0, 50).join(', ') };
