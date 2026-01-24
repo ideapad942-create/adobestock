@@ -22,7 +22,7 @@
         .api-link { display: inline-block; margin-top: 10px; font-size: 13px; color: #64748b; text-decoration: none; }
         .api-link strong { color: var(--primary); text-decoration: underline; }
 
-        .result-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 25px; margin-bottom: 30px; border-left: 5px solid var(--primary); }
+        .result-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 25px; margin-bottom: 30px; }
         .field-label { font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-top: 18px; display: block; letter-spacing: 0.5px; }
         
         .copy-wrapper { display: flex; align-items: center; gap: 12px; background: #f8fafc; padding: 12px 15px; border-radius: 8px; border: 1px solid #e2e8f0; margin-top: 6px; }
@@ -40,12 +40,6 @@
         th, td { padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: left; font-size: 14px; }
         .img-mini { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; }
         
-        /* FOOTER & ANIMATION */
-        .footer { text-align: center; margin-top: 30px; padding: 20px; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; }
-        .footer strong { color: var(--dark); }
-        .males-mikir-msg { margin-top: 10px; font-style: italic; animation: fadeInOut 4s infinite; color: var(--primary); font-weight: 500; }
-        @keyframes fadeInOut { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
-
         .status-badge { padding: 5px 12px; border-radius: 20px; font-size: 10px; font-weight: bold; }
         .s-ready { background: #f1f5f9; color: #64748b; }
         .s-run { background: #e0e7ff; color: #4338ca; animation: pulse 1s infinite; }
@@ -97,11 +91,6 @@
         </div>
         <div id="resultContainer"></div>
     </div>
-
-    <div class="footer">
-        <strong>License Bang Jeyy</strong><br>
-        <div class="males-mikir-msg">"Cukup buat kamu yang males mikir pakek ini, jangan ajak orang males mikir"</div>
-    </div>
 </div>
 
 <script>
@@ -116,13 +105,17 @@
     dropArea.addEventListener('click', () => document.getElementById('fileInput').click());
 
     const SYSTEM_PROMPT = `
-    Role: Senior Metadata Specialist for US Microstock Video.
-    Task: Create metadata for VIDEO FOOTAGE.
+    Role: Senior Metadata Specialist for Microstock Video.
+    Task: Create metadata for VIDEO FOOTAGE assets.
     
     RULES:
-    1. TITLE: Descriptive but natural. STRICT LENGTH: Minimum 5 words.
-    2. DESCRIPTION: Visual explanation. LENGTH: 35 to 100 words.
-    3. KEYWORDS: 50 single-word keywords. NO resolution, NO numbers, NO format terms.
+    1. TITLE: Very simple (1-3 words), strictly visual.
+    2. DESCRIPTION: Detailed visual explanation. LENGTH: 35 to 100 words.
+    3. KEYWORDS: Provide 50 single-word keywords. 
+       - NO resolution terms (4k, hd, 8k, resolution, etc).
+       - NO numbers.
+       - NO format terms (vector, image, photo, jpg, eps, etc).
+       - Focus ONLY on visual elements and mood.
 
     Output ONLY JSON: {"title": "...", "description": "...", "keywords": "..."}
     `;
@@ -181,7 +174,7 @@
                         model: "meta-llama/llama-4-scout-17b-16e-instruct",
                         messages: [
                             { role: "system", content: SYSTEM_PROMPT },
-                            { role: "user", content: [{ type: "text", text: "Metadata for video frame:" }, { type: "image_url", image_url: { url: `data:image/jpeg;base64,${item.base64}` } }] }
+                            { role: "user", content: [{ type: "text", text: "Analyze for video metadata:" }, { type: "image_url", image_url: { url: `data:image/jpeg;base64,${item.base64}` } }] }
                         ], response_format: { type: "json_object" }
                     })
                 });
@@ -201,18 +194,25 @@
 
     function processKeywords(data) {
         let raw = (Array.isArray(data.keywords) ? data.keywords.join(' ') : data.keywords);
+        // Hapus simbol, pecah jadi kata tunggal, hapus yang mengandung angka
         let words = raw.toLowerCase().replace(/[^a-z\s]/g, ' ').split(/\s+/).filter(w => w.length > 2 && !/\d/.test(w));
+        
         let uniqueWords = [...new Set(words)];
 
-        const banned = ['4k', '8k', 'hd', 'vector', 'image', 'photo', 'picture', 'jpg', 'png', 'jpeg', 'eps', 'ai', 'svg', 'illustration', 'fps'];
+        // Blacklist ketat (Resolusi, Format, Angka)
+        const banned = ['4k', '8k', 'hd', 'uhd', 'resolution', 'vector', 'image', 'photo', 'picture', 'jpg', 'png', 'jpeg', 'eps', 'ai', 'svg', 'illustration', 'fps'];
         uniqueWords = uniqueWords.filter(w => !banned.includes(w));
 
-        const videoFillers = ['footage', 'animation', 'clip', 'motion', 'loop', 'video', 'render', 'background', 'overlay', 'effect', 'broadcast', 'cinema'];
-        videoFillers.forEach(v => { if (uniqueWords.length < 41 && !uniqueWords.includes(v)) uniqueWords.push(v); });
+        // Pancingan kata kunci video murni
+        const videoFillers = ['footage', 'animation', 'clip', 'motion', 'loop', 'video', 'render', 'background', 'overlay', 'effect', 'broadcast', 'cinema', 'cinematic'];
+        videoFillers.forEach(v => {
+            if (uniqueWords.length < 41 && !uniqueWords.includes(v)) uniqueWords.push(v);
+        });
 
+        // Paksa target 39-42
         if (uniqueWords.length > 42) uniqueWords = uniqueWords.slice(0, 42);
         while (uniqueWords.length < 39) {
-            uniqueWords.push(['creative', 'abstract', 'modern', 'digital', 'professional'][Math.floor(Math.random() * 5)]);
+            uniqueWords.push(['creative', 'abstract', 'modern', 'digital', 'professional', 'moody'][Math.floor(Math.random() * 6)]);
             uniqueWords = [...new Set(uniqueWords)];
         }
 
@@ -227,11 +227,11 @@
                 <img src="${item.preview}" class="img-mini">
                 <strong>${item.name}</strong>
             </div>
-            <span class="field-label">TITLE (Min 5 Words)</span>
+            <span class="field-label">TITLE</span>
             <div class="copy-wrapper"><div class="field-val" id="t-${item.id}">${data.title}</div><button class="btn-copy" onclick="copyText(this, 't-${item.id}')">Copy</button></div>
             <span class="field-label">DESCRIPTION (35-100 Words)</span>
             <div class="copy-wrapper"><div class="field-val" id="d-${item.id}">${data.description}</div><button class="btn-copy" onclick="copyText(this, 'd-${item.id}')">Copy</button></div>
-            <span class="field-label">KEYWORDS (Target 39-42: ${data.keywords.split(',').length})</span>
+            <span class="field-label">KEYWORDS (Single Words: ${data.keywords.split(',').length})</span>
             <div class="copy-wrapper"><div class="field-val" id="k-${item.id}">${data.keywords}</div><button class="btn-copy" onclick="copyText(this, 'k-${item.id}')">Copy</button></div>
         `;
         document.getElementById('resultContainer').appendChild(div);
