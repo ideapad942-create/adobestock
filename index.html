@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Metadata V8 - Pure Video SEO</title>
+    <title>MALES MIKIR - AI Metadata V8</title>
     <style>
         :root { --primary: #4f46e5; --success: #10b981; --dark: #0f172a; --bg: #f1f5f9; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #334155; }
@@ -28,7 +28,7 @@
         .btn-copy { background: #e2e8f0; border: none; padding: 6px 12px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; }
         .btn-copy.copied { background: var(--success); color: white; }
 
-        .btn { width: 100%; padding: 15px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 15px; font-size: 14px; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 15px; font-size: 14px; transition: 0.2s; }
         .btn-blue { background: var(--primary); color: white; }
         .btn-disabled { opacity: 0.5; cursor: not-allowed; }
 
@@ -37,7 +37,7 @@
         .img-mini { width: 45px; height: 45px; object-fit: cover; border-radius: 4px; }
         
         .footer { text-align: center; margin-top: 25px; padding: 15px; font-size: 11px; color: #94a3b8; border-top: 1px solid #eee; }
-        .males-mikir-msg { margin-top: 5px; font-style: italic; animation: pulse 3s infinite; color: var(--primary); }
+        .males-mikir-msg { margin-top: 5px; font-style: italic; animation: pulse 3s infinite; color: var(--primary); font-weight: 600; }
         @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
 
         .status-badge { padding: 4px 10px; border-radius: 15px; font-size: 9px; font-weight: bold; }
@@ -57,7 +57,7 @@
     </div>
 
     <div id="c0" class="content active">
-        <h2>🔑 API Setup</h2>
+        <h2>🔑 API Setup - MALES MIKIR</h2>
         <input type="password" id="apiKey" placeholder="gsk_xxxxxxxxxxxxxxxx" style="width:100%; padding:14px; border:1px solid #cbd5e1; border-radius:8px; box-sizing: border-box;">
         <p style="font-size:12px; color:#64748b; margin-top:8px;">
             Belum punya API KEY? <a href="https://console.groq.com/keys" target="_blank" style="color:var(--primary); font-weight:bold;">Generate di sini</a>
@@ -66,11 +66,11 @@
     </div>
 
     <div id="c1" class="content">
-        <h2>📁 Asset Upload</h2>
+        <h2>📁 Upload Asset @Bangjeyy</h2>
         <div id="dropArea" class="drop-zone">
             <span style="font-size:35px;">🎬</span><br>
             <strong>Tarik Foto ke Sini (Bisa Banyak)</strong>
-            <p style="font-size:12px; color:#94a3b8;">Sistem otomatis memasukkan ke antrean</p>
+            <p style="font-size:12px; color:#94a3b8;">Otomatis masuk antrean</p>
             <input type="file" id="fileInput" multiple accept="image/*" style="display:none" onchange="handleFiles(this.files)">
         </div>
         <div id="fileStatus" style="margin-top:15px; text-align:center; font-weight:bold; color:var(--success);"></div>
@@ -78,7 +78,7 @@
     </div>
 
     <div id="c2" class="content">
-        <h2>⚡ AI Processing</h2>
+        <h2>⚡ AI Processing (Fast Mode)</h2>
         <button class="btn btn-blue" id="btnStart" onclick="startProcessing()">🚀 Mulai Generate</button>
         <table>
             <thead><tr><th>Preview</th><th>File</th><th>Status</th></tr></thead>
@@ -111,12 +111,13 @@
     dropArea.addEventListener('drop', (e) => handleFiles(e.dataTransfer.files));
     dropArea.addEventListener('click', () => document.getElementById('fileInput').click());
 
+    // Prompt diperpendek agar AI lebih cepat merespon
     const SYSTEM_PROMPT = `
-    Role: Microstock Video Metadata Specialist.
-    Task: Analyze frame for video asset.
-    1. TITLE: Honest visual title. MUST BE AT LEAST 5 WORDS.
-    2. DESCRIPTION: Detailed explanation. Length: 35 to 100 words.
-    3. KEYWORDS: 50 single-word keywords. NO resolution (4k), NO numbers, NO format terms (vector, image).
+    Role: Microstock Video Expert.
+    Task: Create metadata for video asset.
+    1. TITLE: Visual description. MIN 5 WORDS.
+    2. DESCRIPTION: Detailed story. 35-100 words.
+    3. KEYWORDS: 50 single words. NO stop-words (and, the, with, for). NO numbers.
     Return ONLY JSON: {"title": "...", "description": "...", "keywords": "..."}
     `;
 
@@ -133,7 +134,7 @@
 
     async function handleFiles(files) {
         if (!files.length) return;
-        document.getElementById('fileStatus').innerText = "Compressing...";
+        document.getElementById('fileStatus').innerText = "Optimizing images...";
         for (let i = 0; i < files.length; i++) {
             const currentId = queue.length;
             const c = await compressImage(files[i]);
@@ -151,11 +152,11 @@
                 const img = new Image(); img.src = e.target.result;
                 img.onload = () => {
                     const cvs = document.createElement('canvas');
-                    const maxSide = 400; // Ukuran diperkecil agar super ringan
+                    const maxSide = 350; // Lebih kecil lagi agar kirim data lebih cepat
                     const scl = maxSide / Math.max(img.width, img.height);
                     cvs.width = img.width * scl; cvs.height = img.height * scl;
                     cvs.getContext('2d').drawImage(img, 0, 0, cvs.width, cvs.height);
-                    resolve({ data: cvs.toDataURL('image/jpeg', 0.5).split(',')[1], preview: e.target.result });
+                    resolve({ data: cvs.toDataURL('image/jpeg', 0.4).split(',')[1], preview: e.target.result });
                 };
             };
         });
@@ -164,7 +165,7 @@
     async function startProcessing() {
         const k = localStorage.getItem('GROQ_V8_KEY');
         const btn = document.getElementById('btnStart');
-        btn.disabled = true; btn.innerText = "Processing...";
+        btn.disabled = true; btn.innerText = "Fast Processing...";
 
         for (let item of queue) {
             if (item.processed) continue;
@@ -178,7 +179,7 @@
                         model: "meta-llama/llama-4-scout-17b-16e-instruct",
                         messages: [
                             { role: "system", content: SYSTEM_PROMPT },
-                            { role: "user", content: [{ type: "text", text: "Metadata for:" }, { type: "image_url", image_url: { url: `data:image/jpeg;base64,${item.base64}` } }] }
+                            { role: "user", content: [{ type: "text", text: "Fix metadata:" }, { type: "image_url", image_url: { url: `data:image/jpeg;base64,${item.base64}` } }] }
                         ], temperature: 0, response_format: { type: "json_object" }
                     })
                 });
@@ -191,7 +192,8 @@
                 statusEl.innerHTML = `<span class="status-badge s-done">DONE</span>`;
                 item.processed = true;
             } catch (e) { statusEl.innerHTML = `<span style="color:red">Error</span>`; }
-            await new Promise(r => setTimeout(r, 300)); // Jeda dipercepat
+            // Jeda dikurangi maksimal agar tidak terasa lama
+            await new Promise(r => setTimeout(r, 100)); 
         }
         btn.disabled = false; btn.innerText = "🚀 Mulai Generate"; goToTab(3);
     }
@@ -199,11 +201,17 @@
     function processKeywords(data) {
         let raw = (Array.isArray(data.keywords) ? data.keywords.join(' ') : data.keywords);
         let words = raw.toLowerCase().replace(/[^a-z\s]/g, ' ').split(/\s+/).filter(w => w.length > 2 && !/\d/.test(w));
-        let uniqueWords = [...new Set(words)];
+        
+        // Filter Kata "Haram" (Stop Words)
+        const stopWords = ['and', 'the', 'with', 'for', 'from', 'that', 'this', 'these', 'those', 'into', 'upon', 'their'];
+        let uniqueWords = [...new Set(words)].filter(w => !stopWords.includes(w));
+
         const banned = ['4k','8k','hd','vector','image','photo','picture','jpg','png','jpeg','eps','ai','svg','illustration','fps','uhd'];
         uniqueWords = uniqueWords.filter(w => !banned.includes(w));
+        
         const videoFillers = ['footage','animation','clip','motion','loop','video','render','background','overlay','effect'];
         videoFillers.forEach(v => { if (uniqueWords.length < 41 && !uniqueWords.includes(v)) uniqueWords.push(v); });
+
         if (uniqueWords.length > 42) uniqueWords = uniqueWords.slice(0, 42);
         while (uniqueWords.length < 39) {
             uniqueWords.push(['creative','abstract','modern','digital','professional'][Math.floor(Math.random() * 5)]);
@@ -216,15 +224,15 @@
         const div = document.createElement('div');
         div.className = 'result-card';
         div.innerHTML = `
-            <div style="display:flex; gap:12px; align-items:center; border-bottom:1px solid #eee; padding-bottom:8px;">
+            <div style="display:flex; gap:10px; align-items:center; border-bottom:1px solid #eee; padding-bottom:5px;">
                 <img src="${item.preview}" class="img-mini">
-                <strong style="font-size:14px;">${item.name}</strong>
+                <strong style="font-size:13px;">${item.name}</strong>
             </div>
             <span class="field-label">TITLE (Min 5 Words)</span>
             <div class="copy-wrapper"><div class="field-val" id="t-${item.id}">${data.title}</div><button class="btn-copy" onclick="copyText(this, 't-${item.id}')">Copy</button></div>
             <span class="field-label">DESCRIPTION (35-100 Words)</span>
             <div class="copy-wrapper"><div class="field-val" id="d-${item.id}">${data.description}</div><button class="btn-copy" onclick="copyText(this, 'd-${item.id}')">Copy</button></div>
-            <span class="field-label">KEYWORDS (${data.keywords.split(',').length} Words)</span>
+            <span class="field-label">KEYWORDS (Clean: ${data.keywords.split(',').length})</span>
             <div class="copy-wrapper"><div class="field-val" id="k-${item.id}">${data.keywords}</div><button class="btn-copy" onclick="copyText(this, 'k-${item.id}')">Copy</button></div>
         `;
         document.getElementById('resultContainer').appendChild(div);
@@ -233,7 +241,7 @@
     function copyText(btn, id) {
         navigator.clipboard.writeText(document.getElementById(id).innerText).then(() => {
             btn.innerText = "OK!"; btn.classList.add('copied');
-            setTimeout(() => { btn.innerText = "Copy"; btn.classList.remove('copied'); }, 1500);
+            setTimeout(() => { btn.innerText = "Copy"; btn.classList.remove('copied'); }, 1200);
         });
     }
 
