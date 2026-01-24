@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MALES MIKIR - Video SEO V8 HQ</title>
+    <title>MALES MIKIR </title>
     <style>
         :root { --primary: #4f46e5; --success: #10b981; --dark: #0f172a; --bg: #f1f5f9; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #334155; }
@@ -56,7 +56,7 @@
     </div>
 
     <div id="c0" class="content active">
-        <h2>🔑 API Setup - MALES MIKIR</h2>
+        <h2>🔑 API Setup</h2>
         <input type="password" id="apiKey" placeholder="gsk_xxxxxxxxxxxxxxxx" style="width:100%; padding:14px; border:1px solid #cbd5e1; border-radius:8px; box-sizing: border-box;">
         <p style="font-size:12px; color:#64748b; margin-top:8px;">
             Belum punya API KEY? <a href="https://console.groq.com/keys" target="_blank" style="color:var(--primary); font-weight:bold;">Generate di sini</a>
@@ -65,20 +65,20 @@
     </div>
 
     <div id="c1" class="content">
-        <h2>📁 Upload Asset @Bangjeyy</h2>
+        <h2>📁 Upload Asset</h2>
         <div id="dropArea" class="drop-zone">
             <span style="font-size:35px;">🎬</span><br>
-            <strong>Tarik Frame Video ke Sini</strong>
+            <strong>Drag & Drop Foto</strong>
             <p style="font-size:12px; color:#94a3b8;">Multiple upload didukung</p>
             <input type="file" id="fileInput" multiple accept="image/*" style="display:none" onchange="handleFiles(this.files)">
         </div>
         <div id="fileStatus" style="margin-top:15px; text-align:center; font-weight:bold; color:var(--success);"></div>
-        <button class="btn btn-blue" id="btnNext" style="display:none;" onclick="goToTab(2)">Ke Proses AI ➡️</button>
+        <button class="btn btn-blue" id="btnNext" style="display:none;" onclick="goToTab(2)">Generate Metadata ➡️</button>
     </div>
 
     <div id="c2" class="content">
         <h2>⚡ Video Processing (2s Delay)</h2>
-        <p style="font-size:11px; color:#64748b;">Memberikan jeda agar AI maksimal membuat Title & Deskripsi Video US Market.</p>
+        <p style="font-size:11px; color:#64748b;">Memberikan jeda agar AI maksimal membuat Title, Deskripsi & Keyword.</p>
         <button class="btn btn-blue" id="btnStart" onclick="startProcessing()">🚀 Mulai Generate Metadata</button>
         <table>
             <thead><tr><th>Preview</th><th>File</th><th>Status</th></tr></thead>
@@ -89,7 +89,7 @@
     <div id="c3" class="content">
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:20px;">
             <button class="btn btn-blue" style="background:var(--success)" onclick="exportCSV()">📥 Download CSV</button>
-            <button class="btn btn-blue" style="background:#64748b" onclick="resetAll()">🔄 Reset / Tambah</button>
+            <button class="btn btn-blue" style="background:#64748b" onclick="resetAll()">🔄 Reset / Upload Ulang</button>
         </div>
         <div id="resultContainer"></div>
     </div>
