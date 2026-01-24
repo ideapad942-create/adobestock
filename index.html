@@ -7,50 +7,43 @@
     <style>
         :root { --primary: #4f46e5; --success: #10b981; --dark: #0f172a; --bg: #f1f5f9; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #334155; }
-        .container { max-width: 950px; margin: auto; background: white; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); overflow: hidden; }
+        .container { max-width: 900px; margin: auto; background: white; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); overflow: hidden; }
         
         .tabs { display: flex; background: var(--dark); }
-        .tab-btn { flex: 1; padding: 18px; border: none; background: none; color: #94a3b8; cursor: not-allowed; font-weight: 600; transition: 0.3s; font-size: 14px; letter-spacing: 1px; }
+        .tab-btn { flex: 1; padding: 18px; border: none; background: none; color: #94a3b8; cursor: not-allowed; font-weight: 600; transition: 0.3s; font-size: 13px; }
         .tab-btn.active { color: white; background: var(--primary); cursor: default; border-bottom: 4px solid #818cf8; }
 
-        .content { padding: 40px; display: none; }
+        .content { padding: 30px; display: none; }
         .content.active { display: block; }
 
-        .drop-zone { border: 2px dashed #cbd5e1; padding: 60px 20px; text-align: center; border-radius: 16px; cursor: pointer; background: #f8fafc; transition: 0.3s; }
-        .drop-zone:hover { border-color: var(--primary); background: #eef2ff; }
+        .drop-zone { border: 2px dashed #cbd5e1; padding: 50px 20px; text-align: center; border-radius: 12px; cursor: pointer; transition: 0.2s; }
+        .drop-zone:hover { border-color: var(--primary); background: #fcfcff; }
 
-        .api-link { display: inline-block; margin-top: 10px; font-size: 13px; color: #64748b; text-decoration: none; }
-        .api-link strong { color: var(--primary); text-decoration: underline; }
-
-        .result-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 25px; margin-bottom: 30px; border-left: 5px solid var(--primary); }
-        .field-label { font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-top: 18px; display: block; letter-spacing: 0.5px; }
+        .result-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 20px; margin-bottom: 25px; border-left: 4px solid var(--primary); }
+        .field-label { font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-top: 15px; display: block; }
         
-        .copy-wrapper { display: flex; align-items: center; gap: 12px; background: #f8fafc; padding: 12px 15px; border-radius: 8px; border: 1px solid #e2e8f0; margin-top: 6px; }
-        .field-val { font-size: 14px; color: #1e293b; flex-grow: 1; line-height: 1.6; }
+        .copy-wrapper { display: flex; align-items: center; gap: 10px; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0; margin-top: 5px; }
+        .field-val { font-size: 13.5px; color: #1e293b; flex-grow: 1; line-height: 1.5; }
         
-        .btn-copy { background: #e2e8f0; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-copy { background: #e2e8f0; border: none; padding: 6px 12px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; }
         .btn-copy.copied { background: var(--success); color: white; }
 
-        .btn { width: 100%; padding: 16px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 20px; font-size: 15px; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 15px; font-size: 14px; }
         .btn-blue { background: var(--primary); color: white; }
-        .btn-green { background: var(--success); color: white; }
-        .btn-gray { background: #64748b; color: white; }
+        .btn-disabled { opacity: 0.5; cursor: not-allowed; }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: left; font-size: 14px; }
-        .img-mini { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: left; font-size: 13px; }
+        .img-mini { width: 45px; height: 45px; object-fit: cover; border-radius: 4px; }
         
-        /* FOOTER & ANIMATION */
-        .footer { text-align: center; margin-top: 30px; padding: 20px; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; }
-        .footer strong { color: var(--dark); }
-        .males-mikir-msg { margin-top: 10px; font-style: italic; animation: fadeInOut 4s infinite; color: var(--primary); font-weight: 500; }
-        @keyframes fadeInOut { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+        .footer { text-align: center; margin-top: 25px; padding: 15px; font-size: 11px; color: #94a3b8; border-top: 1px solid #eee; }
+        .males-mikir-msg { margin-top: 5px; font-style: italic; animation: pulse 3s infinite; color: var(--primary); }
+        @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
 
-        .status-badge { padding: 5px 12px; border-radius: 20px; font-size: 10px; font-weight: bold; }
+        .status-badge { padding: 4px 10px; border-radius: 15px; font-size: 9px; font-weight: bold; }
         .s-ready { background: #f1f5f9; color: #64748b; }
-        .s-run { background: #e0e7ff; color: #4338ca; animation: pulse 1s infinite; }
+        .s-run { background: #e0e7ff; color: #4338ca; }
         .s-done { background: #d1fae5; color: #065f46; }
-        @keyframes pulse { 50% { opacity: 0.6; } }
     </style>
 </head>
 <body>
@@ -64,26 +57,29 @@
     </div>
 
     <div id="c0" class="content active">
-        <h2>🔑 Setup API</h2>
-        <input type="password" id="apiKey" placeholder="gsk_xxxxxxxxxxxxxxxx" style="width:100%; padding:16px; border:1px solid #cbd5e1; border-radius:8px; box-sizing: border-box;">
-        <a href="https://console.groq.com/keys" target="_blank" class="api-link">Belum punya API KEY? <strong>Generate di sini</strong></a>
+        <h2>🔑 API Setup</h2>
+        <input type="password" id="apiKey" placeholder="gsk_xxxxxxxxxxxxxxxx" style="width:100%; padding:14px; border:1px solid #cbd5e1; border-radius:8px; box-sizing: border-box;">
+        <p style="font-size:12px; color:#64748b; margin-top:8px;">
+            Belum punya API KEY? <a href="https://console.groq.com/keys" target="_blank" style="color:var(--primary); font-weight:bold;">Generate di sini</a>
+        </p>
         <button class="btn btn-blue" onclick="saveKey()">Simpan & Lanjut</button>
     </div>
 
     <div id="c1" class="content">
-        <h2>📁 Upload Asset</h2>
+        <h2>📁 Asset Upload</h2>
         <div id="dropArea" class="drop-zone">
-            <span style="font-size:40px;">🎬</span><br>
-            <strong>Drag & Drop File Di Sini (Bisa Banyak Sekaligus)</strong>
+            <span style="font-size:35px;">🎬</span><br>
+            <strong>Tarik Foto ke Sini (Bisa Banyak)</strong>
+            <p style="font-size:12px; color:#94a3b8;">Sistem otomatis memasukkan ke antrean</p>
             <input type="file" id="fileInput" multiple accept="image/*" style="display:none" onchange="handleFiles(this.files)">
         </div>
-        <div id="fileStatus" style="margin-top:20px; text-align:center; font-weight:bold; color:var(--success);"></div>
-        <button class="btn btn-blue" id="btnNext" style="display:none;" onclick="goToTab(2)">Lanjut ke Proses AI ➡️</button>
+        <div id="fileStatus" style="margin-top:15px; text-align:center; font-weight:bold; color:var(--success);"></div>
+        <button class="btn btn-blue" id="btnNext" style="display:none;" onclick="goToTab(2)">Ke Proses AI ➡️</button>
     </div>
 
     <div id="c2" class="content">
-        <h2>⚡ AI Video Processing</h2>
-        <button class="btn btn-blue" id="btnStart" onclick="startProcessing()">🚀 Mulai Generate Metadata</button>
+        <h2>⚡ AI Processing</h2>
+        <button class="btn btn-blue" id="btnStart" onclick="startProcessing()">🚀 Mulai Generate</button>
         <table>
             <thead><tr><th>Preview</th><th>File</th><th>Status</th></tr></thead>
             <tbody id="queueList"></tbody>
@@ -91,9 +87,9 @@
     </div>
 
     <div id="c3" class="content">
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:30px;">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:20px;">
             <button class="btn btn-green" onclick="exportCSV()">📥 Download CSV</button>
-            <button class="btn btn-gray" onclick="resetAll()">🔄 Reset / Tambah File</button>
+            <button class="btn btn-gray" onclick="resetAll()">🔄 Reset / Tambah</button>
         </div>
         <div id="resultContainer"></div>
     </div>
@@ -116,15 +112,12 @@
     dropArea.addEventListener('click', () => document.getElementById('fileInput').click());
 
     const SYSTEM_PROMPT = `
-    Role: Senior Metadata Specialist for US Microstock Video.
-    Task: Create metadata for VIDEO FOOTAGE.
-    
-    RULES:
-    1. TITLE: Descriptive but natural. STRICT LENGTH: Minimum 5 words.
-    2. DESCRIPTION: Visual explanation. LENGTH: 35 to 100 words.
-    3. KEYWORDS: 50 single-word keywords. NO resolution, NO numbers, NO format terms.
-
-    Output ONLY JSON: {"title": "...", "description": "...", "keywords": "..."}
+    Role: Microstock Video Metadata Specialist.
+    Task: Analyze frame for video asset.
+    1. TITLE: Honest visual title. MUST BE AT LEAST 5 WORDS.
+    2. DESCRIPTION: Detailed explanation. Length: 35 to 100 words.
+    3. KEYWORDS: 50 single-word keywords. NO resolution (4k), NO numbers, NO format terms (vector, image).
+    Return ONLY JSON: {"title": "...", "description": "...", "keywords": "..."}
     `;
 
     function goToTab(idx) {
@@ -139,7 +132,8 @@
     if(localStorage.getItem('GROQ_V8_KEY')) document.getElementById('apiKey').value = localStorage.getItem('GROQ_V8_KEY');
 
     async function handleFiles(files) {
-        if (files.length === 0) return;
+        if (!files.length) return;
+        document.getElementById('fileStatus').innerText = "Compressing...";
         for (let i = 0; i < files.length; i++) {
             const currentId = queue.length;
             const c = await compressImage(files[i]);
@@ -157,10 +151,11 @@
                 const img = new Image(); img.src = e.target.result;
                 img.onload = () => {
                     const cvs = document.createElement('canvas');
-                    const scl = 512 / Math.max(img.width, img.height);
+                    const maxSide = 400; // Ukuran diperkecil agar super ringan
+                    const scl = maxSide / Math.max(img.width, img.height);
                     cvs.width = img.width * scl; cvs.height = img.height * scl;
                     cvs.getContext('2d').drawImage(img, 0, 0, cvs.width, cvs.height);
-                    resolve({ data: cvs.toDataURL('image/jpeg', 0.8).split(',')[1], preview: e.target.result });
+                    resolve({ data: cvs.toDataURL('image/jpeg', 0.5).split(',')[1], preview: e.target.result });
                 };
             };
         });
@@ -169,11 +164,13 @@
     async function startProcessing() {
         const k = localStorage.getItem('GROQ_V8_KEY');
         const btn = document.getElementById('btnStart');
-        btn.disabled = true;
+        btn.disabled = true; btn.innerText = "Processing...";
 
         for (let item of queue) {
             if (item.processed) continue;
-            document.getElementById(`status-${item.id}`).innerHTML = `<span class="status-badge s-run">Working...</span>`;
+            const statusEl = document.getElementById(`status-${item.id}`);
+            statusEl.innerHTML = `<span class="status-badge s-run">Working...</span>`;
+            
             try {
                 const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                     method: "POST", headers: { "Authorization": `Bearer ${k}`, "Content-Type": "application/json" },
@@ -181,8 +178,8 @@
                         model: "meta-llama/llama-4-scout-17b-16e-instruct",
                         messages: [
                             { role: "system", content: SYSTEM_PROMPT },
-                            { role: "user", content: [{ type: "text", text: "Metadata for video frame:" }, { type: "image_url", image_url: { url: `data:image/jpeg;base64,${item.base64}` } }] }
-                        ], response_format: { type: "json_object" }
+                            { role: "user", content: [{ type: "text", text: "Metadata for:" }, { type: "image_url", image_url: { url: `data:image/jpeg;base64,${item.base64}` } }] }
+                        ], temperature: 0, response_format: { type: "json_object" }
                     })
                 });
                 const json = await res.json();
@@ -191,31 +188,27 @@
                 
                 results.push({ filename: item.name, ...finalData });
                 renderResult(item, finalData);
-                document.getElementById(`status-${item.id}`).innerHTML = `<span class="status-badge s-done">DONE</span>`;
+                statusEl.innerHTML = `<span class="status-badge s-done">DONE</span>`;
                 item.processed = true;
-            } catch (e) { console.error(e); }
-            await new Promise(r => setTimeout(r, 1000));
+            } catch (e) { statusEl.innerHTML = `<span style="color:red">Error</span>`; }
+            await new Promise(r => setTimeout(r, 300)); // Jeda dipercepat
         }
-        btn.disabled = false; goToTab(3);
+        btn.disabled = false; btn.innerText = "🚀 Mulai Generate"; goToTab(3);
     }
 
     function processKeywords(data) {
         let raw = (Array.isArray(data.keywords) ? data.keywords.join(' ') : data.keywords);
         let words = raw.toLowerCase().replace(/[^a-z\s]/g, ' ').split(/\s+/).filter(w => w.length > 2 && !/\d/.test(w));
         let uniqueWords = [...new Set(words)];
-
-        const banned = ['4k', '8k', 'hd', 'vector', 'image', 'photo', 'picture', 'jpg', 'png', 'jpeg', 'eps', 'ai', 'svg', 'illustration', 'fps'];
+        const banned = ['4k','8k','hd','vector','image','photo','picture','jpg','png','jpeg','eps','ai','svg','illustration','fps','uhd'];
         uniqueWords = uniqueWords.filter(w => !banned.includes(w));
-
-        const videoFillers = ['footage', 'animation', 'clip', 'motion', 'loop', 'video', 'render', 'background', 'overlay', 'effect', 'broadcast', 'cinema'];
+        const videoFillers = ['footage','animation','clip','motion','loop','video','render','background','overlay','effect'];
         videoFillers.forEach(v => { if (uniqueWords.length < 41 && !uniqueWords.includes(v)) uniqueWords.push(v); });
-
         if (uniqueWords.length > 42) uniqueWords = uniqueWords.slice(0, 42);
         while (uniqueWords.length < 39) {
-            uniqueWords.push(['creative', 'abstract', 'modern', 'digital', 'professional'][Math.floor(Math.random() * 5)]);
+            uniqueWords.push(['creative','abstract','modern','digital','professional'][Math.floor(Math.random() * 5)]);
             uniqueWords = [...new Set(uniqueWords)];
         }
-
         return { title: data.title, description: data.description, keywords: uniqueWords.join(', ') };
     }
 
@@ -223,15 +216,15 @@
         const div = document.createElement('div');
         div.className = 'result-card';
         div.innerHTML = `
-            <div style="display:flex; gap:15px; align-items:center; border-bottom:1px solid #eee; padding-bottom:10px;">
+            <div style="display:flex; gap:12px; align-items:center; border-bottom:1px solid #eee; padding-bottom:8px;">
                 <img src="${item.preview}" class="img-mini">
-                <strong>${item.name}</strong>
+                <strong style="font-size:14px;">${item.name}</strong>
             </div>
             <span class="field-label">TITLE (Min 5 Words)</span>
             <div class="copy-wrapper"><div class="field-val" id="t-${item.id}">${data.title}</div><button class="btn-copy" onclick="copyText(this, 't-${item.id}')">Copy</button></div>
             <span class="field-label">DESCRIPTION (35-100 Words)</span>
             <div class="copy-wrapper"><div class="field-val" id="d-${item.id}">${data.description}</div><button class="btn-copy" onclick="copyText(this, 'd-${item.id}')">Copy</button></div>
-            <span class="field-label">KEYWORDS (Target 39-42: ${data.keywords.split(',').length})</span>
+            <span class="field-label">KEYWORDS (${data.keywords.split(',').length} Words)</span>
             <div class="copy-wrapper"><div class="field-val" id="k-${item.id}">${data.keywords}</div><button class="btn-copy" onclick="copyText(this, 'k-${item.id}')">Copy</button></div>
         `;
         document.getElementById('resultContainer').appendChild(div);
@@ -239,12 +232,15 @@
 
     function copyText(btn, id) {
         navigator.clipboard.writeText(document.getElementById(id).innerText).then(() => {
-            btn.innerText = "Copied!"; btn.classList.add('copied');
+            btn.innerText = "OK!"; btn.classList.add('copied');
             setTimeout(() => { btn.innerText = "Copy"; btn.classList.remove('copied'); }, 1500);
         });
     }
 
     function resetAll() {
+        queue = []; results = [];
+        document.getElementById('queueList').innerHTML = "";
+        document.getElementById('resultContainer').innerHTML = "";
         document.getElementById('fileStatus').innerText = "";
         document.getElementById('btnNext').style.display = 'none';
         goToTab(1);
