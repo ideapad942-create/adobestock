@@ -16,60 +16,34 @@
         .content { padding: 40px; display: none; }
         .content.active { display: block; }
 
-        /* UPLOAD AREA */
         .drop-zone { 
-            border: 2px dashed #cbd5e1; 
-            padding: 60px 20px; 
-            text-align: center; 
-            border-radius: 16px; 
-            cursor: pointer; 
-            background: #f8fafc; 
-            transition: 0.3s; 
-            position: relative;
+            border: 2px dashed #cbd5e1; padding: 60px 20px; text-align: center; 
+            border-radius: 16px; cursor: pointer; background: #f8fafc; transition: 0.3s; 
         }
-        .drop-zone:hover, .drop-zone.drag-over { 
-            border-color: var(--primary); 
-            background: #eef2ff; 
-            transform: translateY(-2px);
-        }
-        .drop-zone p { margin: 15px 0 0; color: #64748b; font-size: 14px; }
+        .drop-zone:hover, .drop-zone.drag-over { border-color: var(--primary); background: #eef2ff; }
 
-        /* API LINK */
-        .api-link {
-            display: inline-block;
-            margin-top: 15px;
-            font-size: 13px;
-            color: #64748b;
-            text-decoration: none;
-            transition: 0.2s;
-        }
-        .api-link strong { color: var(--primary); }
-        .api-link:hover { opacity: 0.8; }
+        .api-link { display: inline-block; margin-top: 10px; font-size: 13px; color: #64748b; text-decoration: none; }
+        .api-link strong { color: var(--primary); text-decoration: underline; }
 
-        /* RESULT CARD */
-        .result-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 25px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
-        .field-label { font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-top: 18px; display: block; letter-spacing: 0.8px; }
+        .result-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 25px; margin-bottom: 30px; }
+        .field-label { font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-top: 18px; display: block; }
         
         .copy-wrapper { display: flex; align-items: center; gap: 12px; background: #f8fafc; padding: 12px 15px; border-radius: 8px; border: 1px solid #e2e8f0; margin-top: 6px; }
-        .field-val { font-size: 14px; color: #1e293b; flex-grow: 1; font-family: 'Segoe UI', sans-serif; line-height: 1.5; }
+        .field-val { font-size: 14px; color: #1e293b; flex-grow: 1; }
         
-        .btn-copy { background: #e2e8f0; color: #475569; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; white-space: nowrap; }
-        .btn-copy:hover { background: #cbd5e1; color: #0f172a; }
+        .btn-copy { background: #e2e8f0; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; }
         .btn-copy.copied { background: var(--success); color: white; }
 
-        /* BUTTONS */
-        .btn { width: 100%; padding: 16px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 20px; font-size: 15px; transition: 0.2s; letter-spacing: 0.5px; }
-        .btn-blue { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2); }
-        .btn-blue:hover { background: #4338ca; transform: translateY(-1px); }
+        .btn { width: 100%; padding: 16px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 20px; }
+        .btn-blue { background: var(--primary); color: white; }
         .btn-green { background: var(--success); color: white; }
         .btn-gray { background: #64748b; color: white; }
-        .btn:disabled { background: #cbd5e1; cursor: not-allowed; transform: none; box-shadow: none; }
 
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: left; font-size: 14px; }
-        .img-mini { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0; }
+        .img-mini { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; }
         
-        .status-badge { padding: 5px 12px; border-radius: 20px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
+        .status-badge { padding: 5px 12px; border-radius: 20px; font-size: 10px; font-weight: bold; }
         .s-ready { background: #f1f5f9; color: #64748b; }
         .s-run { background: #e0e7ff; color: #4338ca; animation: pulse 1s infinite; }
         .s-done { background: #d1fae5; color: #065f46; }
@@ -87,24 +61,18 @@
     </div>
 
     <div id="c0" class="content active">
-        <h2 style="margin-top:0">🔑 Setup API</h2>
-        <p style="color:#64748b; font-size:14px; margin-bottom:20px;">Masukkan API Key Groq Anda untuk memulai.</p>
-        <input type="password" id="apiKey" placeholder="gsk_xxxxxxxxxxxxxxxx" style="width:100%; padding:16px; border:1px solid #cbd5e1; border-radius:8px; font-size:16px;">
-        
-        <a href="https://console.groq.com/keys" target="_blank" class="api-link">
-            Belum punya API KEY? <strong>Generate di sini</strong>
-        </a>
-
+        <h2>🔑 Setup API</h2>
+        <input type="password" id="apiKey" placeholder="gsk_xxxxxxxxxxxxxxxx" style="width:100%; padding:16px; border:1px solid #cbd5e1; border-radius:8px;">
+        <a href="https://console.groq.com/keys" target="_blank" class="api-link">Belum punya API KEY? <strong>Generate di sini</strong></a>
         <button class="btn btn-blue" onclick="saveKey()">Simpan & Lanjut</button>
     </div>
 
     <div id="c1" class="content">
-        <h2 style="margin-top:0">📁 Upload Asset</h2>
+        <h2>📁 Upload Asset</h2>
         <div id="dropArea" class="drop-zone">
             <span style="font-size:40px;">🎬</span><br>
-            <strong style="font-size:18px; display:block; margin-top:10px;">Drag & Drop File Di Sini</strong>
-            <span style="font-size:13px; color:#94a3b8">atau <strong>CTRL+V</strong> untuk Paste Gambar</span>
-            <p>Sistem mendukung <strong>Multiple Upload</strong> (banyak file sekaligus)</p>
+            <strong>Drag & Drop File Di Sini (Bisa Banyak Sekaligus)</strong>
+            <p>Atau Klik untuk memilih file</p>
             <input type="file" id="fileInput" multiple accept="image/*" style="display:none" onchange="handleFiles(this.files)">
         </div>
         <div id="fileStatus" style="margin-top:20px; text-align:center; font-weight:bold; color:var(--success);"></div>
@@ -112,7 +80,7 @@
     </div>
 
     <div id="c2" class="content">
-        <h2 style="margin-top:0">⚡ AI Video Processing</h2>
+        <h2>⚡ AI Video Processing</h2>
         <button class="btn btn-blue" id="btnStart" onclick="startProcessing()">🚀 Mulai Generate Metadata</button>
         <table>
             <thead><tr><th>Preview</th><th>File</th><th>Status</th></tr></thead>
@@ -122,8 +90,8 @@
 
     <div id="c3" class="content">
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:30px;">
-            <button class="btn btn-green" style="margin-top:0" onclick="exportCSV()">📥 Download CSV</button>
-            <button class="btn btn-gray" style="margin-top:0" onclick="resetAll()">🔄 Reset / Upload Lagi</button>
+            <button class="btn btn-green" onclick="exportCSV()">📥 Download CSV</button>
+            <button class="btn btn-gray" onclick="resetAll()">🔄 Reset / Tambah File</button>
         </div>
         <div id="resultContainer"></div>
     </div>
@@ -134,35 +102,19 @@
     let results = [];
     const dropArea = document.getElementById('dropArea');
 
-    // --- SETUP DRAG & DROP & PASTE ---
+    // SETUP EVENT LISTENERS
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(n => {
-        dropArea.addEventListener(n, pD, false); document.body.addEventListener(n, pD, false);
+        dropArea.addEventListener(n, (e) => { e.preventDefault(); e.stopPropagation(); });
     });
-    function pD(e){ e.preventDefault(); e.stopPropagation(); }
-    
     dropArea.addEventListener('dragenter', () => dropArea.classList.add('drag-over'));
     dropArea.addEventListener('dragleave', () => dropArea.classList.remove('drag-over'));
-    dropArea.addEventListener('drop', (e) => handleFiles(e.dataTransfer.files));
+    dropArea.addEventListener('drop', (e) => { dropArea.classList.remove('drag-over'); handleFiles(e.dataTransfer.files); });
     dropArea.addEventListener('click', () => document.getElementById('fileInput').click());
-    
-    document.addEventListener('paste', (e) => {
-        const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-        const files = [];
-        for (let index in items) {
-            if (items[index].kind === 'file') files.push(new File([items[index].getAsFile()], `pasted_${Date.now()}.png`, { type: 'image/png' }));
-        }
-        if(files.length > 0) { goToTab(1); handleFiles(files); }
-    });
 
     const SYSTEM_PROMPT = `
     Role: Senior Metadata Specialist for US Microstock Video (Shutterstock, Adobe Stock, Pond5).
-    Task: Create metadata for VIDEO FOOTAGE assets based on the provided image frame.
-
-    CRITICAL KEYWORD RULES (STRICT):
-    1. **BANNED WORDS**: Do NOT use: vector, image, photo, picture, jpg, png, ai, eps, illustration.
-    2. **VIDEO FOCUS**: Use terms like: footage, animation, clip, motion, loop, render, background, overlay, effect.
-    3. **SINGLE WORDS**: Split all phrases. "Film burn" -> "film", "burn".
-
+    Task: Create metadata for VIDEO FOOTAGE assets.
+    CRITICAL: No vector/photo/image terms. Use footage/animation/loop.
     JSON Output: {"title": "...", "description": "...", "keywords": "word1, word2, ..."}
     `;
 
@@ -179,20 +131,17 @@
 
     async function handleFiles(files) {
         if (files.length === 0) return;
-        
-        document.getElementById('fileStatus').innerText = "Menambahkan file...";
+        document.getElementById('fileStatus').innerText = "Menyiapkan file...";
         
         for (let i = 0; i < files.length; i++) {
-            const fileId = queue.length; // Biar ID nya unik lanjut dari yang lama
+            const currentId = queue.length;
             const c = await compressImage(files[i]);
-            queue.push({ id: fileId, name: files[i].name, base64: c.data, preview: c.preview });
+            queue.push({ id: currentId, name: files[i].name, base64: c.data, preview: c.preview });
             
-            // Tambahkan ke tabel antrean secara visual
-            const row = `<tr><td><img src="${c.preview}" class="img-mini"></td><td>${files[i].name}</td><td id="status-${fileId}"><span class="status-badge s-ready">Ready</span></td></tr>`;
+            const row = `<tr id="row-${currentId}"><td><img src="${c.preview}" class="img-mini"></td><td>${files[i].name}</td><td id="status-${currentId}"><span class="status-badge s-ready">Ready</span></td></tr>`;
             document.getElementById('queueList').innerHTML += row;
         }
-        
-        document.getElementById('fileStatus').innerText = `${queue.length} File dalam antrean!`;
+        document.getElementById('fileStatus').innerText = `${queue.length} File Siap!`;
         document.getElementById('btnNext').style.display = 'block';
     }
 
@@ -214,25 +163,23 @@
 
     async function startProcessing() {
         const k = localStorage.getItem('GROQ_V8_KEY');
-        if(!k) return alert("API Key belum diset!");
-        
-        document.getElementById('btnStart').disabled = true;
-        document.getElementById('btnStart').innerText = "Sedang Generate Metadata...";
-        results = [];
-        document.getElementById('resultContainer').innerHTML = "";
+        const btn = document.getElementById('btnStart');
+        btn.disabled = true;
+        btn.innerText = "Processing...";
 
         for (let item of queue) {
             const statusEl = document.getElementById(`status-${item.id}`);
+            if (statusEl.innerText === "DONE") continue; // Lewati yang sudah selesai
+
             statusEl.innerHTML = `<span class="status-badge s-run">Working...</span>`;
-            
             try {
                 const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                     method: "POST", headers: { "Authorization": `Bearer ${k}`, "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        model: "llama-3.2-11b-vision-preview",
+                        model: "meta-llama/llama-4-scout-17b-16e-instruct", // Model asli milikmu
                         messages: [
                             { role: "system", content: SYSTEM_PROMPT },
-                            { role: "user", content: [{ type: "text", text: `Analyze for video metadata: ${item.name}` }, { type: "image_url", image_url: { url: `data:image/jpeg;base64,${item.base64}` } }] }
+                            { role: "user", content: [{ type: "text", text: `Analyze: ${item.name}` }, { type: "image_url", image_url: { url: `data:image/jpeg;base64,${item.base64}` } }] }
                         ], temperature: 0.1, response_format: { type: "json_object" }
                     })
                 });
@@ -242,49 +189,35 @@
                 
                 results.push({ filename: item.name, ...finalData });
                 renderResult(item, finalData);
-                statusEl.innerHTML = `<span class="status-badge s-done">Done</span>`;
+                statusEl.innerHTML = `<span class="status-badge s-done">DONE</span>`;
             } catch (e) {
                 console.error(e);
                 statusEl.innerHTML = `<span style="color:red; font-size:10px;">Error</span>`;
             }
-            await new Promise(r => setTimeout(r, 500));
+            await new Promise(r => setTimeout(r, 800));
         }
-        document.getElementById('btnStart').disabled = false;
-        document.getElementById('btnStart').innerText = "🚀 Mulai Generate";
+        btn.disabled = false;
+        btn.innerText = "🚀 Mulai Generate";
         goToTab(3);
     }
 
     function processKeywords(data) {
         let kwRaw = (Array.isArray(data.keywords) ? data.keywords.join(' ') : data.keywords);
         let kw = kwRaw.toLowerCase().replace(/[^a-z0-9\s,]/g, '').replace(/[,\s]+/g, ' ').split(' ').filter(k => k.length > 2);
-        
-        const banned = ['vector', 'image', 'photo', 'picture', 'jpg', 'png', 'jpeg', 'eps', 'ai', 'svg'];
-        kw = [...new Set(kw.filter(w => !banned.includes(w)))];
-
-        // Ensure video terms
-        ['animation', 'footage', 'motion', 'loop', 'render'].forEach(t => { if(!kw.includes(t)) kw.push(t); });
-
-        if (kw.length > 42) kw = kw.slice(0, 42);
-
+        kw = [...new Set(kw)].slice(0, 45);
         return { title: data.title, description: data.description, keywords: kw.join(', ') };
     }
 
     function renderResult(item, data) {
-        const count = data.keywords.split(',').length;
         const div = document.createElement('div');
         div.className = 'result-card';
         div.innerHTML = `
-            <div style="display:flex; gap:15px; align-items:center; border-bottom:1px solid #f1f5f9; padding-bottom:15px; margin-bottom:15px;">
+            <div style="display:flex; gap:15px; align-items:center;">
                 <img src="${item.preview}" class="img-mini">
-                <div>
-                    <strong style="font-size:16px;">${item.name}</strong><br>
-                    <span style="font-size:12px; color:#059669">● ${count} Keywords</span>
-                </div>
+                <strong>${item.name}</strong>
             </div>
             <span class="field-label">TITLE</span>
             <div class="copy-wrapper"><div class="field-val" id="t-${item.id}">${data.title}</div><button class="btn-copy" onclick="copyText(this, 't-${item.id}')">Copy</button></div>
-            <span class="field-label">DESCRIPTION</span>
-            <div class="copy-wrapper"><div class="field-val" id="d-${item.id}">${data.description}</div><button class="btn-copy" onclick="copyText(this, 'd-${item.id}')">Copy</button></div>
             <span class="field-label">KEYWORDS</span>
             <div class="copy-wrapper"><div class="field-val" id="k-${item.id}">${data.keywords}</div><button class="btn-copy" onclick="copyText(this, 'k-${item.id}')">Copy</button></div>
         `;
@@ -292,30 +225,25 @@
     }
 
     function copyText(btn, id) {
-        const txt = document.getElementById(id).innerText;
-        navigator.clipboard.writeText(txt).then(() => {
+        navigator.clipboard.writeText(document.getElementById(id).innerText).then(() => {
             btn.innerText = "Copied!"; btn.classList.add('copied');
             setTimeout(() => { btn.innerText = "Copy"; btn.classList.remove('copied'); }, 1500);
         });
     }
 
     function resetAll() {
-        queue = []; results = [];
-        document.getElementById('queueList').innerHTML = "";
-        document.getElementById('resultContainer').innerHTML = "";
         document.getElementById('fileStatus').innerText = "";
         document.getElementById('btnNext').style.display = 'none';
-        document.getElementById('fileInput').value = "";
         goToTab(1);
     }
 
     function exportCSV() {
-        if(!results.length) return alert("Belum ada data!");
+        if(!results.length) return alert("Kosong!");
         let csv = "Filename,Title,Description,Keywords\n";
-        results.forEach(r => csv += `"${r.filename}","${r.title.replace(/"/g,'""')}","${r.description.replace(/"/g,'""')}","${r.keywords}"\n`);
+        results.forEach(r => csv += `"${r.filename}","${r.title}","${r.description}","${r.keywords}"\n`);
         const a = document.createElement("a");
         a.href = URL.createObjectURL(new Blob([csv], {type:"text/csv"}));
-        a.download = `Metadata_Video_${Date.now()}.csv`;
+        a.download = `Metadata_${Date.now()}.csv`;
         a.click();
     }
 </script>
