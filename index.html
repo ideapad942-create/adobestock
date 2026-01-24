@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Video Metadata - V5 Focus Edition</title>
+    <title>AI Metadata V6 - Hybrid Smart Edition</title>
     <style>
-        :root { --primary: #2563eb; --success: #059669; --dark: #1e293b; --bg: #f1f5f9; }
+        :root { --primary: #2563eb; --success: #059669; --dark: #0f172a; --bg: #f8fafc; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #334155; }
-        .container { max-width: 950px; margin: auto; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; }
+        .container { max-width: 950px; margin: auto; background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; }
         
         .tabs { display: flex; background: var(--dark); }
-        .tab-btn { flex: 1; padding: 15px; border: none; background: none; color: #94a3b8; cursor: not-allowed; font-weight: 600; transition: 0.3s; }
+        .tab-btn { flex: 1; padding: 16px; border: none; background: none; color: #94a3b8; cursor: not-allowed; font-weight: 600; transition: 0.3s; }
         .tab-btn.active { color: white; background: var(--primary); cursor: default; }
 
         .content { padding: 30px; display: none; }
@@ -29,21 +29,20 @@
         .s-done { background: #d1fae5; color: #047857; }
         @keyframes pulse { 50% { opacity: 0.5; } }
 
-        .result-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-bottom: 25px; position: relative; }
-        .field-label { font-size: 11px; font-weight: bold; color: #64748b; text-transform: uppercase; margin-top: 15px; display: block; }
+        .result-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 25px; }
+        .field-label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-top: 15px; display: block; letter-spacing: 0.5px; }
         
-        .copy-wrapper { display: flex; align-items: center; gap: 10px; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0; margin-top: 5px; }
-        .field-val { font-size: 14px; color: #1e293b; flex-grow: 1; }
+        .copy-wrapper { display: flex; align-items: center; gap: 10px; background: #f1f5f9; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; margin-top: 5px; }
+        .field-val { font-size: 14px; color: #1e293b; flex-grow: 1; font-family: 'Segoe UI', sans-serif; }
         
-        .btn-copy { background: #cbd5e1; color: #1e293b; border: none; padding: 5px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; transition: 0.2s; white-space: nowrap; }
-        .btn-copy:hover { background: #94a3b8; }
+        .btn-copy { background: #cbd5e1; color: #1e293b; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; white-space: nowrap; }
+        .btn-copy:hover { background: #94a3b8; color: white; }
         .btn-copy.copied { background: var(--success); color: white; }
 
         .btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 15px; font-size: 15px; transition: 0.2s; }
         .btn-blue { background: var(--primary); color: white; }
         .btn-green { background: var(--success); color: white; }
         .btn-gray { background: #64748b; color: white; }
-        .btn:disabled { background: #cbd5e1; cursor: not-allowed; }
     </style>
 </head>
 <body>
@@ -59,16 +58,16 @@
     <div id="c0" class="content active">
         <h2>🔑 API Setup</h2>
         <input type="password" id="apiKey" placeholder="gsk_xxxxxxxxxxxxxxxx" style="width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:8px;">
-        <div style="margin-top:10px;"><a href="https://console.groq.com/keys" target="_blank" style="color:var(--primary); font-weight:bold; font-size:13px; text-decoration:none;">👉 Get Free Groq API Key Here</a></div>
+        <div style="margin-top:10px;"><a href="https://console.groq.com/keys" target="_blank" style="color:var(--primary); font-weight:bold; font-size:13px; text-decoration:none;">👉 Get Groq API Key Here</a></div>
         <button class="btn btn-blue" onclick="saveKey()">Simpan & Lanjut</button>
     </div>
 
     <div id="c1" class="content">
-        <h2>📁 Upload (Simulasi Video Frame)</h2>
+        <h2>📁 Smart Upload</h2>
         <div class="drop-zone" onclick="document.getElementById('fileInput').click()">
-            <span style="font-size:24px;">🎬</span><br>
+            <span style="font-size:24px;">🖼️</span><br>
             <strong>Klik untuk pilih gambar</strong><br>
-            <span style="font-size:12px; color:#64748b">Gambar akan diproses sebagai footage/animasi video</span>
+            <span style="font-size:12px; color:#64748b">Otomatis deteksi: Ilustrasi, Logo, atau Foto</span>
             <input type="file" id="fileInput" multiple accept="image/*" style="display:none" onchange="handleFiles(this.files)">
         </div>
         <div id="fileStatus" style="margin-top:15px; text-align:center; font-weight:bold; color:var(--success);"></div>
@@ -76,7 +75,7 @@
     </div>
 
     <div id="c2" class="content">
-        <h2>⚡ AI Video Asset Analysis</h2>
+        <h2>⚡ Hybrid AI Analysis</h2>
         <button class="btn btn-blue" id="btnStart" onclick="startProcessing()">🚀 Mulai Generate</button>
         <table>
             <thead><tr><th>Preview</th><th>File</th><th>Status</th></tr></thead>
@@ -97,19 +96,27 @@
     let queue = [];
     let results = [];
 
-    // --- PROMPT BARU: FOKUS VIDEO ASSET & PENGGUNAAN ---
+    // --- PROMPT V6: HYBRID INTELLIGENCE ---
     const SYSTEM_PROMPT = `
-    Role: Senior Video Stock Metadata Specialist (Adobe Stock/Shutterstock Video).
-    Task: Analyze the provided image *as a single frame from a video clip* and generate metadata optimized for VIDEO footage sales.
+    Role: Expert Microstock Metadata Specialist.
+    Task: Analyze the image and generate metadata bridging "Visual Accuracy" and "Video Usage Potential".
 
     CRITICAL INSTRUCTIONS:
-    1. VISUAL INTERPRETATION: Assume motion. If it's a static logo, assume it's an "animation" or "reveal". If it's a scene, assume it's "footage" or a "clip". Accurately describe colors and objects but frame them in a video context. Do NOT say "black background" if it's just dark or transparent; focus on the subject.
-    2. TITLE: Very simple. [Main Subject] + [Video noun]. Examples: "Instagram logo animation", "Anime girl looking up footage", "Abstract light leak clip". (Max 70 chars).
-    3. DESCRIPTION: Focus on USAGE and CONTEXT for a video editor. How can this clip be used? Examples: "Looping Instagram logo reveal for social media outro", "Slow motion footage of an anime girl for music video background", "Overlay effect of light leaks for transitions". (15-30 words).
-    4. KEYWORDS: STRICTLY SINGLE WORDS. Target range: 39-41 words.
-       - Must include video tags: *animation, footage, clip, motion, video, loop, element, background, overlay*.
-       - Break phrases: "light leak" becomes "light", "leak".
-       - NO technical specs (4k, 8k, uhd, fps).
+    1. TITLE (VISUAL HONESTY): 
+       - Look at the style. Is it an Anime? A Cartoon? A Vector? A Photo?
+       - Format: [Main Subject] + [Art Style]. 
+       - Example: "Anime girl with long hair illustration", "Instagram logo vector icon", "Mountain landscape photo".
+       - **FORBIDDEN IN TITLE**: Do NOT use words like "footage", "video", "clip", "recording" inside the Title unless it looks like a real camera recording.
+    
+    2. DESCRIPTION (USAGE CONTEXT): 
+       - Describe the image but mention its potential use for video editors.
+       - Example: "Anime style illustration of a group of characters, suitable for use as a background in video animation projects or motion graphics."
+    
+    3. KEYWORDS (VIDEO SEO): 
+       - STRICTLY SINGLE WORDS. Target: 39-41 words.
+       - **Must include video tags**: animation, motion, loop, element, graphic, design, background, overlay.
+       - **Must include style tags**: anime, cartoon, illustration, vector (if applicable).
+       - NO phrases.
 
     Output JSON format: {"title": "...", "description": "...", "keywords": "word1, word2, ..."}
     `;
@@ -121,24 +128,24 @@
 
     function saveKey() {
         const k = document.getElementById('apiKey').value.trim();
-        if(k.startsWith('gsk_')) { localStorage.setItem('GROQ_V5_KEY', k); goToTab(1); }
+        if(k.startsWith('gsk_')) { localStorage.setItem('GROQ_V6_KEY', k); goToTab(1); }
         else alert("API Key tidak valid!");
     }
-    if(localStorage.getItem('GROQ_V5_KEY')) document.getElementById('apiKey').value = localStorage.getItem('GROQ_V5_KEY');
+    if(localStorage.getItem('GROQ_V6_KEY')) document.getElementById('apiKey').value = localStorage.getItem('GROQ_V6_KEY');
 
     async function handleFiles(files) {
         if (files.length === 0) return;
         queue = [];
         const tbody = document.getElementById('queueList');
         tbody.innerHTML = "";
-        document.getElementById('fileStatus').innerText = "Memuat gambar...";
+        document.getElementById('fileStatus').innerText = "Memuat...";
 
         for (let i = 0; i < files.length; i++) {
             const compressed = await compressImage(files[i]);
             queue.push({ id: i, name: files[i].name, base64: compressed.data, preview: compressed.preview });
             tbody.innerHTML += `<tr><td><img src="${compressed.preview}" class="img-mini"></td><td>${files[i].name}</td><td id="status-${i}"><span class="status-badge s-ready">Ready</span></td></tr>`;
         }
-        document.getElementById('fileStatus').innerText = `${files.length} File Siap Diproses!`;
+        document.getElementById('fileStatus').innerText = `${files.length} Foto Siap!`;
         document.getElementById('btnNext').style.display = 'block';
     }
 
@@ -151,7 +158,6 @@
                 img.src = e.target.result;
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
-                    // Resize ke 512px untuk kecepatan maksimal
                     const scale = 512 / Math.max(img.width, img.height);
                     canvas.width = img.width * scale; canvas.height = img.height * scale;
                     canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
@@ -162,30 +168,30 @@
     }
 
     async function startProcessing() {
-        const apiKey = localStorage.getItem('GROQ_V5_KEY');
+        const apiKey = localStorage.getItem('GROQ_V6_KEY');
         if(!apiKey) return alert("API Key belum diset!");
         document.getElementById('btnStart').disabled = true;
-        document.getElementById('btnStart').innerText = "Processing Video Metadata...";
+        document.getElementById('btnStart').innerText = "Sedang Memproses...";
         results = [];
 
         for (let item of queue) {
             const statusEl = document.getElementById(`status-${item.id}`);
-            statusEl.innerHTML = `<span class="status-badge s-run">Analysing...</span>`;
+            statusEl.innerHTML = `<span class="status-badge s-run">Analisis AI...</span>`;
 
             try {
                 const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                     method: "POST",
                     headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        model: "meta-llama/llama-4-scout-17b-16e-instruct",
+                        model: "meta-llama/llama-4-scout-17b-16e-instruct", // Model Vision Terbaru
                         messages: [
                             { role: "system", content: SYSTEM_PROMPT },
                             { role: "user", content: [
-                                { type: "text", text: `Analyze this frame as a video footage asset: ${item.name}` },
+                                { type: "text", text: `Analyze this image accurately: ${item.name}` },
                                 { type: "image_url", image_url: { url: `data:image/jpeg;base64,${item.base64}` } }
                             ]}
                         ],
-                        temperature: 0.2, 
+                        temperature: 0.1, // Sangat rendah agar patuh pada visual
                         response_format: { type: "json_object" }
                     })
                 });
@@ -194,54 +200,47 @@
                 if(data.error) throw new Error(data.error.message);
                 const content = JSON.parse(data.choices[0].message.content);
                 
-                // Proses Validasi Keyword Baru (39-41 Kata, Fokus Video)
                 const validated = validateMetadata(content);
                 
                 results.push({ filename: item.name, ...validated });
                 renderResult(item, validated);
-                statusEl.innerHTML = `<span class="status-badge s-done">Done</span>`;
+                statusEl.innerHTML = `<span class="status-badge s-done">Sukses</span>`;
             } catch (err) {
                 console.error(err);
-                statusEl.innerHTML = `<span style="color:red; font-size:10px;">Error: ${err.message.slice(0,20)}</span>`;
+                statusEl.innerHTML = `<span style="color:red; font-size:10px;">Error</span>`;
             }
-            await new Promise(r => setTimeout(r, 1200));
+            await new Promise(r => setTimeout(r, 1000));
         }
         document.getElementById('btnStart').disabled = false;
         document.getElementById('btnStart').innerText = "🚀 Mulai Generate";
         goToTab(3);
     }
 
-    // --- LOGIKA KEYWORD BARU: 39-41 KATA TUNGGAL ---
+    // --- LOGIKA KEYWORD HYBRID (Video + Visual) ---
     function validateMetadata(data) {
-        // 1. Bersihkan dan pecah menjadi kata tunggal (hapus frasa)
-        let kwStr = (typeof data.keywords === 'string' ? data.keywords : data.keywords.join(' '));
-        let kw = kwStr.toLowerCase()
-            .replace(/[^a-z0-9\s,]/g, '') // Hapus karakter aneh
-            .replace(/[,\s]+/g, ' ')     // Ganti koma/spasi ganda jadi spasi tunggal
-            .split(' ')                  // Pecah berdasarkan spasi
+        let kw = (typeof data.keywords === 'string' ? data.keywords : data.keywords.join(' '));
+        kw = kw.toLowerCase()
+            .replace(/[^a-z0-9\s,]/g, '')
+            .replace(/[,\s]+/g, ' ')
+            .split(' ')
             .map(k => k.trim())
-            .filter(k => k.length > 2);  // Hapus kata terlalu pendek
+            .filter(k => k.length > 2);
 
-        kw = [...new Set(kw)]; // Hapus duplikat
+        kw = [...new Set(kw)];
 
-        // 2. Filler Wajib Video Stock (Prioritas Utama)
-        const videoFillers = ['animation', 'footage', 'clip', 'motion', 'video', 'loop', 'element', 'background', 'overlay', 'media', 'stock', 'digital', 'effect'];
-        videoFillers.forEach(f => {
-             if (!kw.includes(f)) kw.push(f);
-        });
+        // Wajib ada Tag Video (Karena user request SEO Video)
+        const videoTags = ['animation', 'motion', 'loop', 'video', 'background', 'overlay', 'graphic', 'design', 'element'];
+        videoTags.forEach(t => { if(!kw.includes(t)) kw.push(t); });
 
-        // 3. Filler Generik jika masih di bawah 39
-        const genericFillers = ["concept", "design", "creative", "modern", "abstract", "art", "graphic", "texture", "pattern", "business", "technology", "internet", "web", "app"];
+        // Filler Umum
+        const fillers = ["creative", "modern", "art", "style", "concept", "digital", "web", "media", "internet", "technology", "abstract", "pattern"];
         let i = 0;
-        while (kw.length < 39 && i < genericFillers.length) {
-            if (!kw.includes(genericFillers[i])) kw.push(genericFillers[i]);
+        while (kw.length < 39 && i < fillers.length) {
+            if (!kw.includes(fillers[i])) kw.push(fillers[i]);
             i++;
         }
 
-        // 4. Potong jika lebih dari 41 (Hard Cap)
-        if (kw.length > 41) {
-            kw = kw.slice(0, 41);
-        }
+        if (kw.length > 41) kw = kw.slice(0, 41);
 
         return { 
             title: data.title, 
@@ -255,24 +254,27 @@
         const kwCount = data.keywords.split(',').length;
         div.className = 'result-card';
         div.innerHTML = `
-            <div style="display:flex; gap:15px; align-items:center; border-bottom:1px solid #eee; padding-bottom:10px;">
+            <div style="display:flex; gap:15px; align-items:center; border-bottom:1px solid #f1f5f9; padding-bottom:15px; margin-bottom:15px;">
                 <img src="${item.preview}" class="img-mini">
-                <strong>${item.name}</strong>
+                <div>
+                    <strong style="font-size:16px;">${item.name}</strong><br>
+                    <span style="font-size:12px; color:#64748b;">Keywords: ${kwCount} words</span>
+                </div>
             </div>
             
-            <span class="field-label">Title (Simple Video Focus)</span>
+            <span class="field-label">Title (Visual Style Accurate)</span>
             <div class="copy-wrapper">
                 <div class="field-val" id="t-${item.id}">${data.title}</div>
                 <button class="btn-copy" onclick="copyText('t-${item.id}', this)">Copy</button>
             </div>
 
-            <span class="field-label">Description (Usage Focus)</span>
+            <span class="field-label">Description (Video Usage Context)</span>
             <div class="copy-wrapper">
                 <div class="field-val" id="d-${item.id}">${data.description}</div>
                 <button class="btn-copy" onclick="copyText('d-${item.id}', this)">Copy</button>
             </div>
 
-            <span class="field-label">Keywords (${kwCount} Single Words - Range 39-41)</span>
+            <span class="field-label">Keywords (SEO Video + Visual)</span>
             <div class="copy-wrapper">
                 <div class="field-val" id="k-${item.id}" style="font-size:12px; line-height:1.6;">${data.keywords}</div>
                 <button class="btn-copy" onclick="copyText('k-${item.id}', this)">Copy</button>
@@ -287,10 +289,7 @@
             const originalText = btn.innerText;
             btn.innerText = "Copied!";
             btn.classList.add('copied');
-            setTimeout(() => {
-                btn.innerText = originalText;
-                btn.classList.remove('copied');
-            }, 2000);
+            setTimeout(() => { btn.innerText = originalText; btn.classList.remove('copied'); }, 1500);
         });
     }
 
@@ -305,19 +304,16 @@
     }
 
     function exportCSV() {
-        if(results.length === 0) return alert("Belum ada data!");
-        let csvContent = "Filename,Title,Description,Keywords\n";
-        results.forEach(row => {
-            const t = `"${row.title.replace(/"/g, '""')}"`;
-            const d = `"${row.description.replace(/"/g, '""')}"`;
-            const k = `"${row.keywords.replace(/"/g, '""')}"`;
-            csvContent += `"${row.filename}",${t},${d},${k}\n`;
+        if(results.length === 0) return alert("Data kosong!");
+        let csv = "Filename,Title,Description,Keywords\n";
+        results.forEach(r => {
+            csv += `"${r.filename}","${r.title.replace(/"/g,'""')}","${r.description.replace(/"/g,'""')}","${r.keywords}"\n`;
         });
-        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = `Video_Metadata_${Date.now()}.csv`;
-        link.click();
+        const blob = new Blob([csv], { type: "text/csv" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `Metadata_V6_${Date.now()}.csv`;
+        a.click();
     }
 </script>
 </body>
