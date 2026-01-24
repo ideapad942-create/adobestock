@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Metadata@bangjeeyy</title>
+    <title>AI Metadata V7 - Drag, Drop & Paste Ready</title>
     <style>
         :root { --primary: #2563eb; --success: #059669; --dark: #0f172a; --bg: #f8fafc; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #334155; }
@@ -16,8 +16,23 @@
         .content { padding: 30px; display: none; }
         .content.active { display: block; }
 
-        .drop-zone { border: 2px dashed #cbd5e1; padding: 40px; text-align: center; border-radius: 12px; cursor: pointer; background: #f8fafc; transition: 0.3s; }
-        .drop-zone:hover { border-color: var(--primary); background: #eff6ff; }
+        /* AREA UPLOAD DIPERBAIKI */
+        .drop-zone { 
+            border: 2px dashed #cbd5e1; 
+            padding: 50px 20px; 
+            text-align: center; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            background: #f8fafc; 
+            transition: 0.3s; 
+            position: relative;
+        }
+        .drop-zone:hover, .drop-zone.drag-over { 
+            border-color: var(--primary); 
+            background: #eff6ff; 
+            transform: scale(1.01);
+        }
+        .drop-zone p { margin: 10px 0 0; color: #64748b; font-size: 14px; }
 
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: left; font-size: 14px; }
@@ -43,6 +58,7 @@
         .btn-blue { background: var(--primary); color: white; }
         .btn-green { background: var(--success); color: white; }
         .btn-gray { background: #64748b; color: white; }
+        .btn:disabled { background: #cbd5e1; cursor: not-allowed; }
     </style>
 </head>
 <body>
@@ -58,16 +74,16 @@
     <div id="c0" class="content active">
         <h2>🔑 API Setup</h2>
         <input type="password" id="apiKey" placeholder="gsk_xxxxxxxxxxxxxxxx" style="width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:8px;">
-        <div style="margin-top:10px;"><a href="https://console.groq.com/keys" target="_blank" style="color:var(--primary); font-weight:bold; font-size:13px; text-decoration:none;">👉 Get Groq API Key Here</a></div>
         <button class="btn btn-blue" onclick="saveKey()">Simpan & Lanjut</button>
     </div>
 
     <div id="c1" class="content">
         <h2>📁 Smart Upload</h2>
-        <div class="drop-zone" onclick="document.getElementById('fileInput').click()">
-            <span style="font-size:24px;">🖼️</span><br>
-            <strong>Klik untuk pilih gambar</strong><br>
-            <span style="font-size:12px; color:#64748b">Otomatis deteksi: Ilustrasi, Logo, atau Foto</span>
+        <div id="dropArea" class="drop-zone">
+            <span style="font-size:32px;">📥</span><br>
+            <strong>Tarik File ke Sini</strong><br>
+            <span style="font-size:12px; color:#64748b">atau <strong>CTRL+V</strong> untuk Paste Gambar</span>
+            <p>Klik untuk Browse Manual</p>
             <input type="file" id="fileInput" multiple accept="image/*" style="display:none" onchange="handleFiles(this.files)">
         </div>
         <div id="fileStatus" style="margin-top:15px; text-align:center; font-weight:bold; color:var(--success);"></div>
@@ -86,7 +102,7 @@
     <div id="c3" class="content">
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:20px;">
             <button class="btn btn-green" style="margin-top:0" onclick="exportCSV()">📥 Download CSV</button>
-            <button class="btn btn-gray" style="margin-top:0" onclick="resetAll()">🔄 Upload Foto Lagi</button>
+            <button class="btn btn-gray" style="margin-top:0" onclick="resetAll()">🔄 Reset / Upload Lagi</button>
         </div>
         <div id="resultContainer"></div>
     </div>
@@ -95,29 +111,83 @@
 <script>
     let queue = [];
     let results = [];
+    const dropArea = document.getElementById('dropArea');
 
-    // --- PROMPT V6: HYBRID INTELLIGENCE ---
+    // --- 1. FITUR DRAG & DROP & PASTE (PERBAIKAN UTAMA) ---
+    
+    // Mencegah default browser membuka gambar
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, preventDefaults, false);
+        document.body.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    // Efek Visual saat Drag
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, () => dropArea.classList.add('drag-over'), false);
+    });
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, () => dropArea.classList.remove('drag-over'), false);
+    });
+
+    // Handle File yang di-DROP
+    dropArea.addEventListener('drop', (e) => {
+        let dt = e.dataTransfer;
+        let files = dt.files;
+        handleFiles(files);
+    });
+
+    // Handle Klik Manual
+    dropArea.addEventListener('click', () => {
+        document.getElementById('fileInput').click();
+    });
+
+    // Handle CTRL+V (PASTE)
+    document.addEventListener('paste', (e) => {
+        if(document.querySelector('.container').style.display === 'none') return;
+        
+        const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+        const files = [];
+        for (let index in items) {
+            const item = items[index];
+            if (item.kind === 'file') {
+                const blob = item.getAsFile();
+                // Beri nama dummy karena paste tidak punya nama file asli
+                const file = new File([blob], `pasted_image_${Date.now()}.png`, { type: blob.type });
+                files.push(file);
+            }
+        }
+        if(files.length > 0) {
+            goToTab(1); // Pindah ke tab upload jika user paste
+            handleFiles(files);
+        }
+    });
+
+    // --- LOGIKA UTAMA (SAMA SEPERTI V6) ---
+
     const SYSTEM_PROMPT = `
     Role: Expert Microstock Metadata Specialist.
     Task: Analyze the image and generate metadata bridging "Visual Accuracy" and "Video Usage Potential".
 
     CRITICAL INSTRUCTIONS:
     1. TITLE (VISUAL HONESTY): 
-       - Look at the style. Is it an Anime? A Cartoon? A Vector? A Photo?
        - Format: [Main Subject] + [Art Style]. 
-       - Example: "Anime girl with long hair illustration", "Instagram logo vector icon", "Mountain landscape photo".
-       - **FORBIDDEN IN TITLE**: Do NOT use words like "footage", "video", "clip", "recording" inside the Title unless it looks like a real camera recording.
+       - Example: "Anime girl with long hair illustration", "Instagram logo vector icon".
+       - **FORBIDDEN IN TITLE**: Do NOT use "footage", "video", "clip" unless it is a real camera recording.
     
     2. DESCRIPTION (USAGE CONTEXT): 
-       - Describe the image but mention its potential use for video editors.
-       - Example: "Anime style illustration of a group of characters, suitable for use as a background in video animation projects or motion graphics."
+       - Describe visually first, then mention video utility.
+       - Example: "Anime style illustration of a girl, suitable for use as a background in video animation projects or motion graphics."
     
     3. KEYWORDS (VIDEO SEO): 
        - STRICTLY SINGLE WORDS. Target: 39-41 words.
-       - **Must include video tags**: animation, motion, loop, element, graphic, design, background, overlay.
-       - **Must include style tags**: anime, cartoon, illustration, vector (if applicable).
-       - NO phrases.
-
+       - Must include video tags: animation, motion, loop, element, graphic, design, background, overlay.
+       - Must include visual tags: anime, cartoon, illustration, vector (if applicable).
+    
     Output JSON format: {"title": "...", "description": "...", "keywords": "word1, word2, ..."}
     `;
 
@@ -128,17 +198,17 @@
 
     function saveKey() {
         const k = document.getElementById('apiKey').value.trim();
-        if(k.startsWith('gsk_')) { localStorage.setItem('GROQ_V6_KEY', k); goToTab(1); }
+        if(k.startsWith('gsk_')) { localStorage.setItem('GROQ_KEY', k); goToTab(1); }
         else alert("API Key tidak valid!");
     }
-    if(localStorage.getItem('GROQ_V6_KEY')) document.getElementById('apiKey').value = localStorage.getItem('GROQ_V6_KEY');
+    if(localStorage.getItem('GROQ_KEY')) document.getElementById('apiKey').value = localStorage.getItem('GROQ_KEY');
 
     async function handleFiles(files) {
         if (files.length === 0) return;
         queue = [];
         const tbody = document.getElementById('queueList');
         tbody.innerHTML = "";
-        document.getElementById('fileStatus').innerText = "Memuat...";
+        document.getElementById('fileStatus').innerText = "Memproses gambar...";
 
         for (let i = 0; i < files.length; i++) {
             const compressed = await compressImage(files[i]);
@@ -168,7 +238,7 @@
     }
 
     async function startProcessing() {
-        const apiKey = localStorage.getItem('GROQ_V6_KEY');
+        const apiKey = localStorage.getItem('GROQ_KEY');
         if(!apiKey) return alert("API Key belum diset!");
         document.getElementById('btnStart').disabled = true;
         document.getElementById('btnStart').innerText = "Sedang Memproses...";
@@ -183,15 +253,15 @@
                     method: "POST",
                     headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        model: "meta-llama/llama-4-scout-17b-16e-instruct", // Model Vision Terbaru
+                        model: "meta-llama/llama-4-scout-17b-16e-instruct",
                         messages: [
                             { role: "system", content: SYSTEM_PROMPT },
                             { role: "user", content: [
-                                { type: "text", text: `Analyze this image accurately: ${item.name}` },
+                                { type: "text", text: `Analyze this image: ${item.name}` },
                                 { type: "image_url", image_url: { url: `data:image/jpeg;base64,${item.base64}` } }
                             ]}
                         ],
-                        temperature: 0.1, // Sangat rendah agar patuh pada visual
+                        temperature: 0.1,
                         response_format: { type: "json_object" }
                     })
                 });
@@ -199,7 +269,6 @@
                 const data = await response.json();
                 if(data.error) throw new Error(data.error.message);
                 const content = JSON.parse(data.choices[0].message.content);
-                
                 const validated = validateMetadata(content);
                 
                 results.push({ filename: item.name, ...validated });
@@ -216,81 +285,91 @@
         goToTab(3);
     }
 
-    // --- LOGIKA KEYWORD HYBRID (Video + Visual) ---
     function validateMetadata(data) {
         let kw = (typeof data.keywords === 'string' ? data.keywords : data.keywords.join(' '));
-        kw = kw.toLowerCase()
-            .replace(/[^a-z0-9\s,]/g, '')
-            .replace(/[,\s]+/g, ' ')
-            .split(' ')
-            .map(k => k.trim())
-            .filter(k => k.length > 2);
-
+        kw = kw.toLowerCase().replace(/[^a-z0-9\s,]/g, '').replace(/[,\s]+/g, ' ').split(' ').map(k => k.trim()).filter(k => k.length > 2);
         kw = [...new Set(kw)];
+        
+        const required = ['animation', 'motion', 'loop', 'video', 'background', 'overlay', 'graphic', 'design', 'element'];
+        required.forEach(t => { if(!kw.includes(t)) kw.push(t); });
 
-        // Wajib ada Tag Video (Karena user request SEO Video)
-        const videoTags = ['animation', 'motion', 'loop', 'video', 'background', 'overlay', 'graphic', 'design', 'element'];
-        videoTags.forEach(t => { if(!kw.includes(t)) kw.push(t); });
-
-        // Filler Umum
-        const fillers = ["creative", "modern", "art", "style", "concept", "digital", "web", "media", "internet", "technology", "abstract", "pattern"];
+        const fillers = ["creative", "modern", "art", "style", "concept", "digital", "web", "media", "internet", "technology"];
         let i = 0;
-        while (kw.length < 39 && i < fillers.length) {
-            if (!kw.includes(fillers[i])) kw.push(fillers[i]);
-            i++;
-        }
-
+        while (kw.length < 39 && i < fillers.length) { if (!kw.includes(fillers[i])) kw.push(fillers[i]); i++; }
         if (kw.length > 41) kw = kw.slice(0, 41);
 
-        return { 
-            title: data.title, 
-            description: data.description, 
-            keywords: kw.join(', ') 
-        };
+        return { title: data.title, description: data.description, keywords: kw.join(', ') };
     }
 
     function renderResult(item, data) {
         const div = document.createElement('div');
-        const kwCount = data.keywords.split(',').length;
         div.className = 'result-card';
         div.innerHTML = `
             <div style="display:flex; gap:15px; align-items:center; border-bottom:1px solid #f1f5f9; padding-bottom:15px; margin-bottom:15px;">
                 <img src="${item.preview}" class="img-mini">
-                <div>
-                    <strong style="font-size:16px;">${item.name}</strong><br>
-                    <span style="font-size:12px; color:#64748b;">Keywords: ${kwCount} words</span>
-                </div>
+                <strong>${item.name}</strong>
             </div>
             
-            <span class="field-label">Title (Visual Style Accurate)</span>
+            <span class="field-label">Title</span>
             <div class="copy-wrapper">
                 <div class="field-val" id="t-${item.id}">${data.title}</div>
-                <button class="btn-copy" onclick="copyText('t-${item.id}', this)">Copy</button>
+                <button class="btn-copy" onclick="copyText(this, 't-${item.id}')">Copy</button>
             </div>
 
-            <span class="field-label">Description (Video Usage Context)</span>
+            <span class="field-label">Description</span>
             <div class="copy-wrapper">
                 <div class="field-val" id="d-${item.id}">${data.description}</div>
-                <button class="btn-copy" onclick="copyText('d-${item.id}', this)">Copy</button>
+                <button class="btn-copy" onclick="copyText(this, 'd-${item.id}')">Copy</button>
             </div>
 
-            <span class="field-label">Keywords (SEO Video + Visual)</span>
+            <span class="field-label">Keywords</span>
             <div class="copy-wrapper">
-                <div class="field-val" id="k-${item.id}" style="font-size:12px; line-height:1.6;">${data.keywords}</div>
-                <button class="btn-copy" onclick="copyText('k-${item.id}', this)">Copy</button>
+                <div class="field-val" id="k-${item.id}" style="font-size:12px;">${data.keywords}</div>
+                <button class="btn-copy" onclick="copyText(this, 'k-${item.id}')">Copy</button>
             </div>
         `;
         document.getElementById('resultContainer').appendChild(div);
     }
 
-    function copyText(elementId, btn) {
+    // --- 2. FUNGSI COPY UNIVERSAL (PERBAIKAN BUTTON) ---
+    function copyText(btn, elementId) {
         const text = document.getElementById(elementId).innerText;
-        navigator.clipboard.writeText(text).then(() => {
-            const originalText = btn.innerText;
-            btn.innerText = "Copied!";
-            btn.classList.add('copied');
-            setTimeout(() => { btn.innerText = originalText; btn.classList.remove('copied'); }, 1500);
-        });
+        
+        // Cara Modern (Navigator API)
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(text).then(() => showCopied(btn))
+            .catch(() => fallbackCopy(text, btn));
+        } else {
+            // Cara Klasik (Fallback untuk file lokal)
+            fallbackCopy(text, btn);
+        }
+    }
+
+    function fallbackCopy(text, btn) {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed"; // Hindari scroll
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        try {
+            document.execCommand('copy');
+            showCopied(btn);
+        } catch (err) {
+            alert('Gagal copy otomatis. Silakan copy manual.');
+        }
+        document.body.removeChild(textArea);
+    }
+
+    function showCopied(btn) {
+        const original = btn.innerText;
+        btn.innerText = "Copied!";
+        btn.classList.add('copied');
+        setTimeout(() => {
+            btn.innerText = original;
+            btn.classList.remove('copied');
+        }, 1500);
     }
 
     function resetAll() {
@@ -312,7 +391,7 @@
         const blob = new Blob([csv], { type: "text/csv" });
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
-        a.download = `Metadata_V6_${Date.now()}.csv`;
+        a.download = `Metadata_V7_${Date.now()}.csv`;
         a.click();
     }
 </script>
