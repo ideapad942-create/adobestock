@@ -34,6 +34,18 @@
         }
         .drop-zone p { margin: 15px 0 0; color: #64748b; font-size: 14px; }
 
+        /* API LINK */
+        .api-link {
+            display: inline-block;
+            margin-top: 15px;
+            font-size: 13px;
+            color: #64748b;
+            text-decoration: none;
+            transition: 0.2s;
+        }
+        .api-link strong { color: var(--primary); }
+        .api-link:hover { opacity: 0.8; }
+
         /* RESULT CARD */
         .result-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 25px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
         .field-label { font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-top: 18px; display: block; letter-spacing: 0.8px; }
@@ -78,6 +90,11 @@
         <h2 style="margin-top:0">🔑 Setup API</h2>
         <p style="color:#64748b; font-size:14px; margin-bottom:20px;">Masukkan API Key Groq Anda untuk memulai.</p>
         <input type="password" id="apiKey" placeholder="gsk_xxxxxxxxxxxxxxxx" style="width:100%; padding:16px; border:1px solid #cbd5e1; border-radius:8px; font-size:16px;">
+        
+        <a href="https://console.groq.com/keys" target="_blank" class="api-link">
+            Belum punya API KEY? <strong>Generate di sini</strong>
+        </a>
+
         <button class="btn btn-blue" onclick="saveKey()">Simpan & Lanjut</button>
     </div>
 
@@ -87,7 +104,7 @@
             <span style="font-size:40px;">🎬</span><br>
             <strong style="font-size:18px; display:block; margin-top:10px;">Drag & Drop File Di Sini</strong>
             <span style="font-size:13px; color:#94a3b8">atau <strong>CTRL+V</strong> untuk Paste Gambar</span>
-            <p>Sistem akan menganggap ini sebagai VIDEO FOOTAGE</p>
+            <p>Sistem mendukung <strong>Multiple Upload</strong> (banyak file sekaligus)</p>
             <input type="file" id="fileInput" multiple accept="image/*" style="display:none" onchange="handleFiles(this.files)">
         </div>
         <div id="fileStatus" style="margin-top:20px; text-align:center; font-weight:bold; color:var(--success);"></div>
@@ -129,7 +146,6 @@
     dropArea.addEventListener('click', () => document.getElementById('fileInput').click());
     
     document.addEventListener('paste', (e) => {
-        if(document.querySelector('.container').style.display === 'none') return;
         const items = (e.clipboardData || e.originalEvent.clipboardData).items;
         const files = [];
         for (let index in items) {
@@ -138,16 +154,14 @@
         if(files.length > 0) { goToTab(1); handleFiles(files); }
     });
 
-    // --- LOGIKA UTAMA V8 (PURE VIDEO SEO) ---
     const SYSTEM_PROMPT = `
     Role: Senior Metadata Specialist for US Microstock Video (Shutterstock, Adobe Stock, Pond5).
     Task: Create metadata for VIDEO FOOTAGE assets based on the provided image frame.
 
     CRITICAL KEYWORD RULES (STRICT):
-    1. **BANNED WORDS**: Do NOT use: vector, image, photo, picture, jpg, png, ai, eps, illustration (unless describing art style, but prefer 'graphic').
+    1. **BANNED WORDS**: Do NOT use: vector, image, photo, picture, jpg, png, ai, eps, illustration.
     2. **VIDEO FOCUS**: Use terms like: footage, animation, clip, motion, loop, render, background, overlay, effect.
     3. **SINGLE WORDS**: Split all phrases. "Film burn" -> "film", "burn".
-    4. **QUANTITY**: Aim for maximum relevance. The system will handle the count, but provide at least 30 rich keywords.
 
     JSON Output: {"title": "...", "description": "...", "keywords": "word1, word2, ..."}
     `;
@@ -165,15 +179,20 @@
 
     async function handleFiles(files) {
         if (files.length === 0) return;
-        queue = [];
-        document.getElementById('queueList').innerHTML = "";
-        document.getElementById('fileStatus').innerText = "Memproses preview...";
+        
+        document.getElementById('fileStatus').innerText = "Menambahkan file...";
+        
         for (let i = 0; i < files.length; i++) {
+            const fileId = queue.length; // Biar ID nya unik lanjut dari yang lama
             const c = await compressImage(files[i]);
-            queue.push({ id: i, name: files[i].name, base64: c.data, preview: c.preview });
-            document.getElementById('queueList').innerHTML += `<tr><td><img src="${c.preview}" class="img-mini"></td><td>${files[i].name}</td><td id="status-${i}"><span class="status-badge s-ready">Ready</span></td></tr>`;
+            queue.push({ id: fileId, name: files[i].name, base64: c.data, preview: c.preview });
+            
+            // Tambahkan ke tabel antrean secara visual
+            const row = `<tr><td><img src="${c.preview}" class="img-mini"></td><td>${files[i].name}</td><td id="status-${fileId}"><span class="status-badge s-ready">Ready</span></td></tr>`;
+            document.getElementById('queueList').innerHTML += row;
         }
-        document.getElementById('fileStatus').innerText = `${files.length} File Siap!`;
+        
+        document.getElementById('fileStatus').innerText = `${queue.length} File dalam antrean!`;
         document.getElementById('btnNext').style.display = 'block';
     }
 
@@ -195,17 +214,22 @@
 
     async function startProcessing() {
         const k = localStorage.getItem('GROQ_V8_KEY');
+        if(!k) return alert("API Key belum diset!");
+        
         document.getElementById('btnStart').disabled = true;
         document.getElementById('btnStart').innerText = "Sedang Generate Metadata...";
         results = [];
+        document.getElementById('resultContainer').innerHTML = "";
 
         for (let item of queue) {
-            document.getElementById(`status-${item.id}`).innerHTML = `<span class="status-badge s-run">Working...</span>`;
+            const statusEl = document.getElementById(`status-${item.id}`);
+            statusEl.innerHTML = `<span class="status-badge s-run">Working...</span>`;
+            
             try {
                 const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                     method: "POST", headers: { "Authorization": `Bearer ${k}`, "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        model: "meta-llama/llama-4-scout-17b-16e-instruct",
+                        model: "llama-3.2-11b-vision-preview",
                         messages: [
                             { role: "system", content: SYSTEM_PROMPT },
                             { role: "user", content: [{ type: "text", text: `Analyze for video metadata: ${item.name}` }, { type: "image_url", image_url: { url: `data:image/jpeg;base64,${item.base64}` } }] }
@@ -215,63 +239,34 @@
                 const json = await res.json();
                 const content = JSON.parse(json.choices[0].message.content);
                 const finalData = processKeywords(content);
+                
                 results.push({ filename: item.name, ...finalData });
                 renderResult(item, finalData);
-                document.getElementById(`status-${item.id}`).innerHTML = `<span class="status-badge s-done">Done</span>`;
+                statusEl.innerHTML = `<span class="status-badge s-done">Done</span>`;
             } catch (e) {
                 console.error(e);
-                document.getElementById(`status-${item.id}`).innerHTML = `<span style="color:red; font-size:10px;">Error</span>`;
+                statusEl.innerHTML = `<span style="color:red; font-size:10px;">Error</span>`;
             }
-            await new Promise(r => setTimeout(r, 1000));
+            await new Promise(r => setTimeout(r, 500));
         }
         document.getElementById('btnStart').disabled = false;
         document.getElementById('btnStart').innerText = "🚀 Mulai Generate";
         goToTab(3);
     }
 
-    // --- SMART KEYWORD PROCESSOR (THE CORE OF V8) ---
     function processKeywords(data) {
-        // 1. Pecah frasa & bersihkan
         let kwRaw = (Array.isArray(data.keywords) ? data.keywords.join(' ') : data.keywords);
-        let kw = kwRaw.toLowerCase()
-            .replace(/[^a-z0-9\s,]/g, '')
-            .replace(/[,\s]+/g, ' ')
-            .split(' ')
-            .map(k => k.trim())
-            .filter(k => k.length > 2); // Hapus kata < 3 huruf
-
-        // 2. BLACKLIST FILTER (Hapus kata 'haram' untuk video)
-        const banned = ['vector', 'image', 'photo', 'picture', 'jpg', 'png', 'jpeg', 'eps', 'ai', 'svg', 'download'];
-        kw = kw.filter(w => !banned.includes(w));
-
-        // 3. MANDATORY VIDEO TAGS (Wajib ada)
-        const videoTags = ['animation', 'footage', 'video', 'clip', 'motion', 'loop', 'background', 'overlay', 'render', 'graphic', 'hd', 'digital'];
-        videoTags.forEach(t => { if(!kw.includes(t)) kw.push(t); });
-
-        // 4. HIGH VALUE FILLERS (Jika kurang dari 39)
-        const fillers = [
-            'creative', 'modern', 'abstract', 'art', 'design', 'concept', 'backdrop', 
-            'effect', 'media', 'technology', 'internet', 'broadcast', 'screen', 'display',
-            'show', 'online', 'web', 'app', 'business', 'presentation', 'corporate', 'dynamic'
-        ];
+        let kw = kwRaw.toLowerCase().replace(/[^a-z0-9\s,]/g, '').replace(/[,\s]+/g, ' ').split(' ').filter(k => k.length > 2);
         
-        // Hapus duplikat dulu sebelum nambah filler
-        kw = [...new Set(kw)];
+        const banned = ['vector', 'image', 'photo', 'picture', 'jpg', 'png', 'jpeg', 'eps', 'ai', 'svg'];
+        kw = [...new Set(kw.filter(w => !banned.includes(w)))];
 
-        let i = 0;
-        while (kw.length < 39 && i < fillers.length) {
-            if (!kw.includes(fillers[i])) kw.push(fillers[i]);
-            i++;
-        }
+        // Ensure video terms
+        ['animation', 'footage', 'motion', 'loop', 'render'].forEach(t => { if(!kw.includes(t)) kw.push(t); });
 
-        // 5. CAP AT 42 (Potong jika kelebihan)
         if (kw.length > 42) kw = kw.slice(0, 42);
 
-        return {
-            title: data.title,
-            description: data.description,
-            keywords: kw.join(', ')
-        };
+        return { title: data.title, description: data.description, keywords: kw.join(', ') };
     }
 
     function renderResult(item, data) {
@@ -283,46 +278,25 @@
                 <img src="${item.preview}" class="img-mini">
                 <div>
                     <strong style="font-size:16px;">${item.name}</strong><br>
-                    <span style="font-size:12px; color:${count >= 39 && count <= 42 ? '#059669' : '#ca8a04'}">
-                        ● ${count} Keywords (Target: 39-42)
-                    </span>
+                    <span style="font-size:12px; color:#059669">● ${count} Keywords</span>
                 </div>
             </div>
-            
-            <span class="field-label">TITLE (Visual Honest)</span>
-            <div class="copy-wrapper">
-                <div class="field-val" id="t-${item.id}">${data.title}</div>
-                <button class="btn-copy" onclick="copyText(this, 't-${item.id}')">Copy</button>
-            </div>
-
-            <span class="field-label">DESCRIPTION (Video Usage)</span>
-            <div class="copy-wrapper">
-                <div class="field-val" id="d-${item.id}">${data.description}</div>
-                <button class="btn-copy" onclick="copyText(this, 'd-${item.id}')">Copy</button>
-            </div>
-
-            <span class="field-label">KEYWORDS (Video SEO Only - No Vector/Image)</span>
-            <div class="copy-wrapper">
-                <div class="field-val" id="k-${item.id}">${data.keywords}</div>
-                <button class="btn-copy" onclick="copyText(this, 'k-${item.id}')">Copy</button>
-            </div>
+            <span class="field-label">TITLE</span>
+            <div class="copy-wrapper"><div class="field-val" id="t-${item.id}">${data.title}</div><button class="btn-copy" onclick="copyText(this, 't-${item.id}')">Copy</button></div>
+            <span class="field-label">DESCRIPTION</span>
+            <div class="copy-wrapper"><div class="field-val" id="d-${item.id}">${data.description}</div><button class="btn-copy" onclick="copyText(this, 'd-${item.id}')">Copy</button></div>
+            <span class="field-label">KEYWORDS</span>
+            <div class="copy-wrapper"><div class="field-val" id="k-${item.id}">${data.keywords}</div><button class="btn-copy" onclick="copyText(this, 'k-${item.id}')">Copy</button></div>
         `;
         document.getElementById('resultContainer').appendChild(div);
     }
 
     function copyText(btn, id) {
         const txt = document.getElementById(id).innerText;
-        const doCopy = () => {
+        navigator.clipboard.writeText(txt).then(() => {
             btn.innerText = "Copied!"; btn.classList.add('copied');
             setTimeout(() => { btn.innerText = "Copy"; btn.classList.remove('copied'); }, 1500);
-        };
-        if(navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(txt).then(doCopy);
-        else {
-            const ta = document.createElement("textarea");
-            ta.value = txt; ta.style.position="fixed"; document.body.appendChild(ta); ta.select();
-            try { document.execCommand('copy'); doCopy(); } catch(e){}
-            document.body.removeChild(ta);
-        }
+        });
     }
 
     function resetAll() {
@@ -341,7 +315,7 @@
         results.forEach(r => csv += `"${r.filename}","${r.title.replace(/"/g,'""')}","${r.description.replace(/"/g,'""')}","${r.keywords}"\n`);
         const a = document.createElement("a");
         a.href = URL.createObjectURL(new Blob([csv], {type:"text/csv"}));
-        a.download = `Metadata_Video_V8_${Date.now()}.csv`;
+        a.download = `Metadata_Video_${Date.now()}.csv`;
         a.click();
     }
 </script>
