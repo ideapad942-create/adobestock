@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MALES MIKIR - FINAL FIXED</title>
+    <title>MALES MIKIR</title>
     <style>
         :root { --primary: #4f46e5; --success: #10b981; --dark: #0f172a; --bg: #f1f5f9; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #334155; }
@@ -206,13 +206,21 @@
         btn.disabled = false; btn.innerText = "🚀 Mulai Generate"; goToTab(3);
     }
 
-    // --- LOGIKA FILTER UTAMA ---
+    // --- LOGIKA FILTER UTAMA (SUDAH DIPERBAIKI ANTI CRASH) ---
     function cleanSEO(data) {
         const junk = ['and', 'the', 'with', 'for', 'from', 'this', 'that', 'photo', 'image', 'picture', 'jpg', 'png', 'video', 'clip', 'footage', 'generated'];
         const banned = ['4k', '8k', 'hd', 'uhd', 'vector', 'illustration', 'eps', 'ai', 'fps'];
 
-        // 1. Pecah semua jadi kata tunggal
-        let rawList = data.keywords.toLowerCase().split(',');
+        // 1. FIX ERROR: Pastikan data.keywords adalah String
+        let kwSource = data.keywords;
+        if (Array.isArray(kwSource)) {
+            kwSource = kwSource.join(', '); // Jika array, ubah jadi string koma
+        } else {
+            kwSource = String(kwSource || ""); // Pastikan string aman
+        }
+
+        // 2. Pecah semua jadi kata tunggal
+        let rawList = kwSource.toLowerCase().split(',');
         let processed = [];
 
         rawList.forEach(word => {
@@ -226,7 +234,7 @@
             });
         });
 
-        // 2. Filter Junk & Banned & Unik
+        // 3. Filter Junk & Banned & Unik
         let clean = processed.filter(w => !junk.includes(w) && !banned.includes(w) && !/\d/.test(w));
         clean = [...new Set(clean)];
 
@@ -249,8 +257,8 @@
         }
 
         return { 
-            title: data.title.substring(0, 70), 
-            description: data.description, 
+            title: (data.title || "").substring(0, 70), 
+            description: (data.description || ""), 
             keywords: clean.join(', ') 
         };
     }
