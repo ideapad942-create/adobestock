@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MALES MIKIR - ADOBE STOCK OPTIMIZED</title>
+    <title>MALES MIKIR - FINAL FIXED</title>
     <style>
         :root { --primary: #4f46e5; --success: #10b981; --dark: #0f172a; --bg: #f1f5f9; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #334155; }
@@ -36,9 +36,7 @@
         .img-mini { width: 45px; height: 45px; object-fit: cover; border-radius: 4px; }
         
         .footer { text-align: center; margin-top: 25px; padding: 15px; font-size: 11px; color: #94a3b8; border-top: 1px solid #eee; }
-        .males-mikir-msg { margin-top: 5px; font-style: italic; animation: pulse 3s infinite; color: var(--primary); font-weight: 600; }
-        @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
-
+        
         .status-badge { padding: 4px 10px; border-radius: 15px; font-size: 9px; font-weight: bold; text-transform: uppercase; }
         .s-run { background: #e0e7ff; color: #4338ca; animation: blink 1s infinite; }
         .s-done { background: #d1fae5; color: #065f46; }
@@ -110,31 +108,20 @@
     dropArea.addEventListener('drop', (e) => handleFiles(e.dataTransfer.files));
     dropArea.addEventListener('click', () => document.getElementById('fileInput').click());
 
-    // --- SYSTEM PROMPT BARU: SESUAI LOGIKA ADOBE STOCK USER ---
+    // SYSTEM PROMPT TETAP: SINGLE WORDS & STRUKTUR
     const SYSTEM_PROMPT = `
-    Role: Professional Adobe Stock Metadata Specialist.
-    Task: Analyze the image as a reference frame for a stock VIDEO FOOTAGE.
+    Role: Adobe Stock Metadata Specialist.
+    Task: Analyze the image for STOCK FOOTAGE metadata.
 
-    STRICT GUIDELINES FOR OUTPUT:
-
-    1. TITLE (PENTING!): 
-       - Must be a natural, factual sentence. 
-       - Structure: [Subject] [Action] [Specific Context/Location].
-       - MAX LENGTH: 70 Characters (Strict limit).
-       - DO NOT start with "A video of...", "Footage of...". Start directly with the subject.
-       - DO NOT include technical specs in Title (No "4k", "HD", "Slow motion", "Close up").
-       - Example: "Young asian woman jogging with golden retriever dog in city park".
-
-    2. DESCRIPTION:
-       - Expand the title. Tell a mini-story about the visual.
-       - Include details: Mood, Lighting, Specific demographics (Ethnicity, Age), Props.
-       - Length: 35-100 words.
-
-    3. KEYWORDS:
-       - Generate 50 raw keywords (we will filter them).
-       - FOCUS ON: Specific object names, Species (e.g., "Jack Russell" not just "dog"), Cuisine names, Clothing types, Demographics (Race, Age), Emotions.
-       - DO NOT USE: Brand names, Fictional characters, "In the style of", Dates.
-       - SEPARATE with commas.
+    STRICT GUIDELINES:
+    1. TITLE: Natural sentence. Max 70 characters. Structure: [Subject] [Action] [Context].
+    2. DESCRIPTION: 35-100 words storytelling about the clip.
+    3. KEYWORDS: 
+       - Generate 60 keywords.
+       - RULE: 100% MUST BE SINGLE WORDS.
+       - SPLIT PHRASES: "blue and white" -> "blue", "white".
+       - INCLUDE: Objects, emotions, colors, demographics, style.
+       - EXCLUDE: "video", "footage", "clip", "4k".
 
     Return ONLY JSON: {"title": "...", "description": "...", "keywords": "..."}
     `;
@@ -195,12 +182,11 @@
                         model: "meta-llama/llama-4-scout-17b-16e-instruct", 
                         messages: [
                             { role: "system", content: SYSTEM_PROMPT },
-                            { role: "user", content: [{ type: "text", text: "Create Adobe Stock metadata for this video frame:" }, { type: "image_url", image_url: { url: `data:image/jpeg;base64,${item.base64}` } }] }
+                            { role: "user", content: [{ type: "text", text: "Create Adobe Stock metadata:" }, { type: "image_url", image_url: { url: `data:image/jpeg;base64,${item.base64}` } }] }
                         ], temperature: 0.1, response_format: { type: "json_object" }
                     })
                 });
                 const json = await res.json();
-                
                 if (json.error) throw new Error(json.error.message);
 
                 const content = JSON.parse(json.choices[0].message.content);
@@ -220,43 +206,52 @@
         btn.disabled = false; btn.innerText = "🚀 Mulai Generate"; goToTab(3);
     }
 
-    // --- LOGIKA FILTER KEYWORD BARU: Min 39, Max 42 ---
+    // --- LOGIKA FILTER UTAMA ---
     function cleanSEO(data) {
-        // Kata yang dilarang keras di keywords
-        const junk = ['and', 'the', 'with', 'for', 'from', 'this', 'that', 'into', 'upon', 'photo', 'image', 'picture', 'jpg', 'png', 'video', 'clip', 'footage'];
-        // Kata teknis yang dilarang user di Judul/Keyword
-        const banned = ['4k', '8k', 'hd', 'uhd', 'vector', 'illustration', 'eps', 'ai', 'generated', 'ai generated'];
-        
-        // Bersihkan keyword dari simbol aneh & lowercase
-        let kw = data.keywords.toLowerCase().replace(/[^a-z0-9,\s]/g, '').split(',');
-        
-        // Filter: Hapus spasi berlebih, hapus kata banned, hapus kata pendek < 2 huruf
-        let clean = kw.map(w => w.trim())
-                      .filter(w => w.length > 2 && !junk.includes(w) && !banned.includes(w) && !/\d/.test(w)); // Hapus angka
+        const junk = ['and', 'the', 'with', 'for', 'from', 'this', 'that', 'photo', 'image', 'picture', 'jpg', 'png', 'video', 'clip', 'footage', 'generated'];
+        const banned = ['4k', '8k', 'hd', 'uhd', 'vector', 'illustration', 'eps', 'ai', 'fps'];
 
-        // Hilangkan duplikat
+        // 1. Pecah semua jadi kata tunggal
+        let rawList = data.keywords.toLowerCase().split(',');
+        let processed = [];
+
+        rawList.forEach(word => {
+            word = word.trim();
+            // Ganti simbol/penghubung dengan spasi
+            word = word.replace(/[^a-z0-9]/g, ' '); 
+            let splitWords = word.split(/\s+/);
+            
+            splitWords.forEach(sw => {
+                if (sw.length > 2) processed.push(sw);
+            });
+        });
+
+        // 2. Filter Junk & Banned & Unik
+        let clean = processed.filter(w => !junk.includes(w) && !banned.includes(w) && !/\d/.test(w));
         clean = [...new Set(clean)];
 
-        // LOGIKA PENGAMAN JUMLAH (Min 39 - Max 42)
-        // Jika kebanyakan -> Potong jadi 42
+        // --- ATURAN KHUSUS JUMLAH KEYWORD ---
+        
+        // Aturan A: Maksimal 42
         if (clean.length > 42) {
             clean = clean.slice(0, 42);
         }
+
+        // Aturan B: Minimal 39 (Wajib isi jika kurang)
+        const fillers = ['concept', 'design', 'art', 'style', 'background', 'view', 'scene', 'shot', 'visual', 'graphic', 'element', 'creative', 'modern', 'digital', 'texture', 'pattern', 'abstract', 'illustration', 'vector', 'drawing', 'sketch'];
         
-        // Jika kurang dari 39 -> Tambah kata-kata aman (filler) yang relevan untuk video
-        const safeFillers = ['lifestyle', 'people', 'person', 'activity', 'day', 'outdoor', 'indoor', 'scene', 'view', 'shot', 'moment', 'real', 'candid'];
-        let fillerIdx = 0;
-        while (clean.length < 39 && fillerIdx < safeFillers.length) {
-            if (!clean.includes(safeFillers[fillerIdx])) {
-                clean.push(safeFillers[fillerIdx]);
+        let i = 0;
+        while (clean.length < 39 && i < fillers.length) {
+            if (!clean.includes(fillers[i])) {
+                clean.push(fillers[i]);
             }
-            fillerIdx++;
+            i++;
         }
 
         return { 
-            title: data.title.substring(0, 70), // Pastikan max 70 char sesuai request
+            title: data.title.substring(0, 70), 
             description: data.description, 
-            keywords: clean.join(', ') // Output string koma
+            keywords: clean.join(', ') 
         };
     }
 
@@ -282,7 +277,7 @@
                 <button class="btn-copy" onclick="copyText(this, 'd-${item.id}')">Copy</button>
             </div>
             
-            <span class="field-label">KEYWORDS (Total: ${kwCount}) [Min 39 - Max 42]</span>
+            <span class="field-label">KEYWORDS (Count: ${kwCount}) [Min 39 - Max 42]</span>
             <div class="copy-wrapper">
                 <div class="field-val" id="k-${item.id}">${data.keywords}</div>
                 <button class="btn-copy" onclick="copyText(this, 'k-${item.id}')">Copy</button>
@@ -326,7 +321,7 @@
         results.forEach(r => csv += `"${r.filename}","${r.title}","${r.description}","${r.keywords}"\n`);
         const a = document.createElement("a");
         a.href = URL.createObjectURL(new Blob([csv], {type:"text/csv"}));
-        a.download = `Metadata_Adobe_Stock_${Date.now()}.csv`;
+        a.download = `Metadata_Fixed_${Date.now()}.csv`;
         a.click();
     }
 </script>
