@@ -177,7 +177,7 @@
                 const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                     method: "POST", headers: { "Authorization": `Bearer ${k}`, "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        model: "meta-llama/llama-4-scout-17b-16e-instruct",
+                        model: "meta-llama/llama-4-scout-17b-16e-instruct", // Model sesuai kode Anda
                         messages: [
                             { role: "system", content: SYSTEM_PROMPT },
                             { role: "user", content: [{ type: "text", text: "Create video metadata for:" }, { type: "image_url", image_url: { url: `data:image/jpeg;base64,${item.base64}` } }] }
@@ -185,6 +185,10 @@
                     })
                 });
                 const json = await res.json();
+                
+                // Cek error dari Groq
+                if (json.error) throw new Error(json.error.message);
+
                 const content = JSON.parse(json.choices[0].message.content);
                 const finalData = cleanSEO(content);
                 
@@ -192,7 +196,10 @@
                 renderResult(item, finalData);
                 statusEl.innerHTML = `<span class="status-badge s-done">DONE</span>`;
                 item.processed = true;
-            } catch (e) { statusEl.innerHTML = `<span style="color:red">Error</span>`; }
+            } catch (e) { 
+                console.error(e);
+                statusEl.innerHTML = `<span style="color:red; font-size:10px;">${e.message || "Error"}</span>`; 
+            }
             
             // JEDA 2 DETIK SESUAI PERMINTAAN AGAR HASIL MAKSIMAL
             await new Promise(r => setTimeout(r, 2000)); 
@@ -234,11 +241,27 @@
         document.getElementById('resultContainer').appendChild(div);
     }
 
+    // --- PERBAIKAN FUNGSI COPY (Agar berfungsi di semua browser & offline) ---
     function copyText(btn, id) {
-        navigator.clipboard.writeText(document.getElementById(id).innerText).then(() => {
-            btn.innerText = "COPIED!"; btn.classList.add('copied');
-            setTimeout(() => { btn.innerText = "Copy"; btn.classList.remove('copied'); }, 1200);
-        });
+        const text = document.getElementById(id).innerText;
+        // Buat elemen textarea sementara
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.style.position = "fixed"; // Agar tidak scroll ke bawah
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.select();
+        
+        try {
+            document.execCommand("copy"); // Cara klasik yang support semua kondisi
+            btn.innerText = "COPIED!";
+            btn.classList.add('copied');
+        } catch (err) {
+            alert("Browser tidak support copy otomatis, silakan copy manual.");
+        }
+        
+        document.body.removeChild(textarea); // Hapus elemen
+        setTimeout(() => { btn.innerText = "Copy"; btn.classList.remove('copied'); }, 1200);
     }
 
     function resetAll() {
