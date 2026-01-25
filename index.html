@@ -10,7 +10,9 @@
         .container { max-width: 900px; margin: auto; background: white; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); overflow: hidden; }
         
         .tabs { display: flex; background: var(--dark); }
-        .tab-btn { flex: 1; padding: 18px; border: none; background: none; color: #94a3b8; cursor: not-allowed; font-weight: 600; transition: 0.3s; font-size: 13px; }
+        /* UBAH CURSOR JADI POINTER AGAR TERLIHAT BISA DIKLIK */
+        .tab-btn { flex: 1; padding: 18px; border: none; background: none; color: #94a3b8; cursor: pointer; font-weight: 600; transition: 0.3s; font-size: 13px; }
+        .tab-btn:hover { background: #1e293b; color: white; }
         .tab-btn.active { color: white; background: var(--primary); cursor: default; border-bottom: 4px solid #818cf8; }
 
         .content { padding: 30px; display: none; }
@@ -47,10 +49,10 @@
 
 <div class="container">
     <div class="tabs">
-        <button class="tab-btn active" id="t0">1. API KEY</button>
-        <button class="tab-btn" id="t1">2. UPLOAD</button>
-        <button class="tab-btn" id="t2">3. PROSES</button>
-        <button class="tab-btn" id="t3">4. HASIL</button>
+        <button class="tab-btn active" id="t0" onclick="goToTab(0)">1. API KEY</button>
+        <button class="tab-btn" id="t1" onclick="goToTab(1)">2. UPLOAD</button>
+        <button class="tab-btn" id="t2" onclick="goToTab(2)">3. PROSES</button>
+        <button class="tab-btn" id="t3" onclick="goToTab(3)">4. HASIL</button>
     </div>
 
     <div id="c0" class="content active">
@@ -206,26 +208,25 @@
         btn.disabled = false; btn.innerText = "🚀 Mulai Generate"; goToTab(3);
     }
 
-    // --- LOGIKA FILTER UTAMA (SUDAH DIPERBAIKI ANTI CRASH) ---
+    // --- LOGIKA FILTER UTAMA (ANTI ERROR & RANGE 39-42) ---
     function cleanSEO(data) {
         const junk = ['and', 'the', 'with', 'for', 'from', 'this', 'that', 'photo', 'image', 'picture', 'jpg', 'png', 'video', 'clip', 'footage', 'generated'];
         const banned = ['4k', '8k', 'hd', 'uhd', 'vector', 'illustration', 'eps', 'ai', 'fps'];
 
-        // 1. FIX ERROR: Pastikan data.keywords adalah String
+        // 1. FIX ERROR & NORMALIZE
         let kwSource = data.keywords;
         if (Array.isArray(kwSource)) {
-            kwSource = kwSource.join(', '); // Jika array, ubah jadi string koma
+            kwSource = kwSource.join(', '); 
         } else {
-            kwSource = String(kwSource || ""); // Pastikan string aman
+            kwSource = String(kwSource || "");
         }
 
-        // 2. Pecah semua jadi kata tunggal
+        // 2. SPLIT TO SINGLE WORDS
         let rawList = kwSource.toLowerCase().split(',');
         let processed = [];
 
         rawList.forEach(word => {
             word = word.trim();
-            // Ganti simbol/penghubung dengan spasi
             word = word.replace(/[^a-z0-9]/g, ' '); 
             let splitWords = word.split(/\s+/);
             
@@ -234,18 +235,15 @@
             });
         });
 
-        // 3. Filter Junk & Banned & Unik
+        // 3. FILTER
         let clean = processed.filter(w => !junk.includes(w) && !banned.includes(w) && !/\d/.test(w));
         clean = [...new Set(clean)];
 
-        // --- ATURAN KHUSUS JUMLAH KEYWORD ---
-        
-        // Aturan A: Maksimal 42
+        // 4. RANGE CHECK (39 - 42)
         if (clean.length > 42) {
             clean = clean.slice(0, 42);
         }
 
-        // Aturan B: Minimal 39 (Wajib isi jika kurang)
         const fillers = ['concept', 'design', 'art', 'style', 'background', 'view', 'scene', 'shot', 'visual', 'graphic', 'element', 'creative', 'modern', 'digital', 'texture', 'pattern', 'abstract', 'illustration', 'vector', 'drawing', 'sketch'];
         
         let i = 0;
