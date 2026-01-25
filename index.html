@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MALES MIKIR </title>
+    <title>MALES MIKIR - ADOBE STOCK OPTIMIZED</title>
     <style>
         :root { --primary: #4f46e5; --success: #10b981; --dark: #0f172a; --bg: #f1f5f9; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #334155; }
@@ -110,17 +110,32 @@
     dropArea.addEventListener('drop', (e) => handleFiles(e.dataTransfer.files));
     dropArea.addEventListener('click', () => document.getElementById('fileInput').click());
 
-    // SYSTEM PROMPT DIOPTIMALKAN UNTUK VIDEO HQ US MARKET
+    // --- SYSTEM PROMPT BARU: SESUAI LOGIKA ADOBE STOCK USER ---
     const SYSTEM_PROMPT = `
-    Role: Senior Video Metadata Specialist for Microstock (Shutterstock, Adobe Stock).
-    Task: Analyze frame for VIDEO FOOTAGE.
-    
-    INSTRUCTIONS:
-    1. NEVER use 'photo' or 'image'. Use 'footage', 'clip', 'shot', 'cinematic'.
-    2. TITLE: Honest visual description. MIN 5 WORDS.
-    3. DESCRIPTION: Professional storytelling related to the title. 35-100 words. Focus on movement and mood.
-    4. KEYWORDS: 50 single words. NO "and", "the", "with". NO numbers. NO resolutions.
-    
+    Role: Professional Adobe Stock Metadata Specialist.
+    Task: Analyze the image as a reference frame for a stock VIDEO FOOTAGE.
+
+    STRICT GUIDELINES FOR OUTPUT:
+
+    1. TITLE (PENTING!): 
+       - Must be a natural, factual sentence. 
+       - Structure: [Subject] [Action] [Specific Context/Location].
+       - MAX LENGTH: 70 Characters (Strict limit).
+       - DO NOT start with "A video of...", "Footage of...". Start directly with the subject.
+       - DO NOT include technical specs in Title (No "4k", "HD", "Slow motion", "Close up").
+       - Example: "Young asian woman jogging with golden retriever dog in city park".
+
+    2. DESCRIPTION:
+       - Expand the title. Tell a mini-story about the visual.
+       - Include details: Mood, Lighting, Specific demographics (Ethnicity, Age), Props.
+       - Length: 35-100 words.
+
+    3. KEYWORDS:
+       - Generate 50 raw keywords (we will filter them).
+       - FOCUS ON: Specific object names, Species (e.g., "Jack Russell" not just "dog"), Cuisine names, Clothing types, Demographics (Race, Age), Emotions.
+       - DO NOT USE: Brand names, Fictional characters, "In the style of", Dates.
+       - SEPARATE with commas.
+
     Return ONLY JSON: {"title": "...", "description": "...", "keywords": "..."}
     `;
 
@@ -177,16 +192,15 @@
                 const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                     method: "POST", headers: { "Authorization": `Bearer ${k}`, "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        model: "meta-llama/llama-4-scout-17b-16e-instruct", // Model sesuai kode Anda
+                        model: "meta-llama/llama-4-scout-17b-16e-instruct", 
                         messages: [
                             { role: "system", content: SYSTEM_PROMPT },
-                            { role: "user", content: [{ type: "text", text: "Create video metadata for:" }, { type: "image_url", image_url: { url: `data:image/jpeg;base64,${item.base64}` } }] }
+                            { role: "user", content: [{ type: "text", text: "Create Adobe Stock metadata for this video frame:" }, { type: "image_url", image_url: { url: `data:image/jpeg;base64,${item.base64}` } }] }
                         ], temperature: 0.1, response_format: { type: "json_object" }
                     })
                 });
                 const json = await res.json();
                 
-                // Cek error dari Groq
                 if (json.error) throw new Error(json.error.message);
 
                 const content = JSON.parse(json.choices[0].message.content);
@@ -201,29 +215,53 @@
                 statusEl.innerHTML = `<span style="color:red; font-size:10px;">${e.message || "Error"}</span>`; 
             }
             
-            // JEDA 2 DETIK SESUAI PERMINTAAN AGAR HASIL MAKSIMAL
             await new Promise(r => setTimeout(r, 2000)); 
         }
         btn.disabled = false; btn.innerText = "🚀 Mulai Generate"; goToTab(3);
     }
 
+    // --- LOGIKA FILTER KEYWORD BARU: Min 39, Max 42 ---
     function cleanSEO(data) {
-        const junk = ['and', 'the', 'with', 'for', 'from', 'this', 'that', 'into', 'upon', 'photo', 'image', 'picture'];
-        const banned = ['4k', '8k', 'hd', 'uhd', 'vector', 'jpg', 'png', 'jpeg', 'eps', 'ai', 'svg', 'illustration', 'fps'];
+        // Kata yang dilarang keras di keywords
+        const junk = ['and', 'the', 'with', 'for', 'from', 'this', 'that', 'into', 'upon', 'photo', 'image', 'picture', 'jpg', 'png', 'video', 'clip', 'footage'];
+        // Kata teknis yang dilarang user di Judul/Keyword
+        const banned = ['4k', '8k', 'hd', 'uhd', 'vector', 'illustration', 'eps', 'ai', 'generated', 'ai generated'];
         
-        let kw = data.keywords.toLowerCase().replace(/[^a-z\s]/g, ' ').split(/\s+/);
-        let clean = [...new Set(kw)].filter(w => w.length > 2 && !junk.includes(w) && !banned.includes(w) && !/\d/.test(w));
+        // Bersihkan keyword dari simbol aneh & lowercase
+        let kw = data.keywords.toLowerCase().replace(/[^a-z0-9,\s]/g, '').split(',');
+        
+        // Filter: Hapus spasi berlebih, hapus kata banned, hapus kata pendek < 2 huruf
+        let clean = kw.map(w => w.trim())
+                      .filter(w => w.length > 2 && !junk.includes(w) && !banned.includes(w) && !/\d/.test(w)); // Hapus angka
 
-        const fillers = ['footage', 'animation', 'motion', 'loop', 'video', 'render', 'background', 'overlay', 'effect', 'cinematic'];
-        fillers.forEach(f => { if (clean.length < 41 && !clean.includes(f)) clean.push(f); });
+        // Hilangkan duplikat
+        clean = [...new Set(clean)];
 
-        if (clean.length > 42) clean = clean.slice(0, 42);
-        while (clean.length < 39) clean.push(['modern', 'abstract', 'creative', 'digital', 'professional'][Math.floor(Math.random()*5)]);
+        // LOGIKA PENGAMAN JUMLAH (Min 39 - Max 42)
+        // Jika kebanyakan -> Potong jadi 42
+        if (clean.length > 42) {
+            clean = clean.slice(0, 42);
+        }
+        
+        // Jika kurang dari 39 -> Tambah kata-kata aman (filler) yang relevan untuk video
+        const safeFillers = ['lifestyle', 'people', 'person', 'activity', 'day', 'outdoor', 'indoor', 'scene', 'view', 'shot', 'moment', 'real', 'candid'];
+        let fillerIdx = 0;
+        while (clean.length < 39 && fillerIdx < safeFillers.length) {
+            if (!clean.includes(safeFillers[fillerIdx])) {
+                clean.push(safeFillers[fillerIdx]);
+            }
+            fillerIdx++;
+        }
 
-        return { title: data.title, description: data.description, keywords: [...new Set(clean)].join(', ') };
+        return { 
+            title: data.title.substring(0, 70), // Pastikan max 70 char sesuai request
+            description: data.description, 
+            keywords: clean.join(', ') // Output string koma
+        };
     }
 
     function renderResult(item, data) {
+        const kwCount = data.keywords.split(',').length;
         const div = document.createElement('div');
         div.className = 'result-card';
         div.innerHTML = `
@@ -231,36 +269,46 @@
                 <img src="${item.preview}" class="img-mini">
                 <strong style="font-size:13px;">${item.name}</strong>
             </div>
-            <span class="field-label">VIDEO TITLE (Min 5 Words)</span>
-            <div class="copy-wrapper"><div class="field-val" id="t-${item.id}">${data.title}</div><button class="btn-copy" onclick="copyText(this, 't-${item.id}')">Copy</button></div>
-            <span class="field-label">FOOTAGE DESCRIPTION (35-100 Words)</span>
-            <div class="copy-wrapper"><div class="field-val" id="d-${item.id}">${data.description}</div><button class="btn-copy" onclick="copyText(this, 'd-${item.id}')">Copy</button></div>
-            <span class="field-label">KEYWORDS (Clean SEO: ${data.keywords.split(',').length})</span>
-            <div class="copy-wrapper"><div class="field-val" id="k-${item.id}">${data.keywords}</div><button class="btn-copy" onclick="copyText(this, 'k-${item.id}')">Copy</button></div>
+            
+            <span class="field-label">TITLE (Max 70 Chars)</span>
+            <div class="copy-wrapper">
+                <div class="field-val" id="t-${item.id}">${data.title}</div>
+                <button class="btn-copy" onclick="copyText(this, 't-${item.id}')">Copy</button>
+            </div>
+            
+            <span class="field-label">DESCRIPTION</span>
+            <div class="copy-wrapper">
+                <div class="field-val" id="d-${item.id}">${data.description}</div>
+                <button class="btn-copy" onclick="copyText(this, 'd-${item.id}')">Copy</button>
+            </div>
+            
+            <span class="field-label">KEYWORDS (Total: ${kwCount}) [Min 39 - Max 42]</span>
+            <div class="copy-wrapper">
+                <div class="field-val" id="k-${item.id}">${data.keywords}</div>
+                <button class="btn-copy" onclick="copyText(this, 'k-${item.id}')">Copy</button>
+            </div>
         `;
         document.getElementById('resultContainer').appendChild(div);
     }
 
-    // --- PERBAIKAN FUNGSI COPY (Agar berfungsi di semua browser & offline) ---
     function copyText(btn, id) {
         const text = document.getElementById(id).innerText;
-        // Buat elemen textarea sementara
         const textarea = document.createElement("textarea");
         textarea.value = text;
-        textarea.style.position = "fixed"; // Agar tidak scroll ke bawah
+        textarea.style.position = "fixed"; 
         textarea.style.opacity = "0";
         document.body.appendChild(textarea);
         textarea.select();
         
         try {
-            document.execCommand("copy"); // Cara klasik yang support semua kondisi
+            document.execCommand("copy"); 
             btn.innerText = "COPIED!";
             btn.classList.add('copied');
         } catch (err) {
-            alert("Browser tidak support copy otomatis, silakan copy manual.");
+            alert("Copy manual ya.");
         }
         
-        document.body.removeChild(textarea); // Hapus elemen
+        document.body.removeChild(textarea); 
         setTimeout(() => { btn.innerText = "Copy"; btn.classList.remove('copied'); }, 1200);
     }
 
@@ -278,7 +326,7 @@
         results.forEach(r => csv += `"${r.filename}","${r.title}","${r.description}","${r.keywords}"\n`);
         const a = document.createElement("a");
         a.href = URL.createObjectURL(new Blob([csv], {type:"text/csv"}));
-        a.download = `Metadata_HQ_Video_${Date.now()}.csv`;
+        a.download = `Metadata_Adobe_Stock_${Date.now()}.csv`;
         a.click();
     }
 </script>
