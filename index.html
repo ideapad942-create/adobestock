@@ -110,20 +110,20 @@
     dropArea.addEventListener('drop', (e) => handleFiles(e.dataTransfer.files));
     dropArea.addEventListener('click', () => document.getElementById('fileInput').click());
 
-    // SYSTEM PROMPT TETAP: SINGLE WORDS & STRUKTUR
+    // --- MODIFIKASI: PROMPT DISESUAIKAN UNTUK 150 KARAKTER & 45-47 KEYWORDS ---
     const SYSTEM_PROMPT = `
     Role: Adobe Stock Metadata Specialist.
     Task: Analyze the image for STOCK FOOTAGE metadata.
 
     STRICT GUIDELINES:
-    1. TITLE: Natural sentence. Max 70 characters. Structure: [Subject] [Action] [Context].
-    2. DESCRIPTION: 35-100 words storytelling about the clip.
+    1. TITLE: Natural sentence. Max 70 characters (Adobe Limit). Structure: [Subject] [Action] [Context].
+    2. DESCRIPTION: Write a detailed description, exactly around 150-160 characters length.
     3. KEYWORDS: 
-       - Generate 60 keywords.
+       - Generate 65 keywords (to be filtered down).
        - RULE: 100% MUST BE SINGLE WORDS.
        - SPLIT PHRASES: "blue and white" -> "blue", "white".
-       - INCLUDE: Objects, emotions, colors, demographics, style.
-       - EXCLUDE: "video", "footage", "clip", "4k".
+       - INCLUDE: Objects, emotions, colors, demographics, style, lighting.
+       - EXCLUDE: "video", "footage", "clip", "4k", "hd".
 
     Return ONLY JSON: {"title": "...", "description": "...", "keywords": "..."}
     `;
@@ -208,7 +208,7 @@
         btn.disabled = false; btn.innerText = "🚀 Mulai Generate"; goToTab(3);
     }
 
-    // --- LOGIKA FILTER UTAMA (ANTI ERROR & RANGE 39-42) ---
+    // --- MODIFIKASI: LOGIKA FILTER UNTUK 45-47 KEYWORD ---
     function cleanSEO(data) {
         const junk = ['and', 'the', 'with', 'for', 'from', 'this', 'that', 'photo', 'image', 'picture', 'jpg', 'png', 'video', 'clip', 'footage', 'generated'];
         const banned = ['4k', '8k', 'hd', 'uhd', 'vector', 'illustration', 'eps', 'ai', 'fps'];
@@ -239,15 +239,16 @@
         let clean = processed.filter(w => !junk.includes(w) && !banned.includes(w) && !/\d/.test(w));
         clean = [...new Set(clean)];
 
-        // 4. RANGE CHECK (39 - 42)
-        if (clean.length > 42) {
-            clean = clean.slice(0, 42);
+        // 4. RANGE CHECK (TARGET: 45 - 47)
+        if (clean.length > 47) {
+            clean = clean.slice(0, 47);
         }
 
-        const fillers = ['concept', 'design', 'art', 'style', 'background', 'view', 'scene', 'shot', 'visual', 'graphic', 'element', 'creative', 'modern', 'digital', 'texture', 'pattern', 'abstract', 'illustration', 'vector', 'drawing', 'sketch'];
+        const fillers = ['concept', 'design', 'art', 'style', 'background', 'view', 'scene', 'shot', 'visual', 'graphic', 'element', 'creative', 'modern', 'digital', 'texture', 'pattern', 'abstract', 'illustration', 'vector', 'drawing', 'sketch', 'color', 'light', 'bright', 'motion', 'dynamic'];
         
         let i = 0;
-        while (clean.length < 39 && i < fillers.length) {
+        // Tambahkan filler jika kurang dari 45
+        while (clean.length < 45 && i < fillers.length) {
             if (!clean.includes(fillers[i])) {
                 clean.push(fillers[i]);
             }
@@ -277,13 +278,13 @@
                 <button class="btn-copy" onclick="copyText(this, 't-${item.id}')">Copy</button>
             </div>
             
-            <span class="field-label">DESCRIPTION</span>
+            <span class="field-label">DESCRIPTION (~150 Chars)</span>
             <div class="copy-wrapper">
                 <div class="field-val" id="d-${item.id}">${data.description}</div>
                 <button class="btn-copy" onclick="copyText(this, 'd-${item.id}')">Copy</button>
             </div>
             
-            <span class="field-label">KEYWORDS (Count: ${kwCount}) [Min 39 - Max 42]</span>
+            <span class="field-label">KEYWORDS (Count: ${kwCount}) [Target 45-47]</span>
             <div class="copy-wrapper">
                 <div class="field-val" id="k-${item.id}">${data.keywords}</div>
                 <button class="btn-copy" onclick="copyText(this, 'k-${item.id}')">Copy</button>
