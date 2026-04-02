@@ -56,13 +56,14 @@
     </div>
 
     <div id="c0" class="content active">
-        <h2>🔑 API Setup</h2>
-        <input type="password" id="apiKey" placeholder="gsk_xxxxxxxxxxxxxxxx" style="width:100%; padding:14px; border:1px solid #cbd5e1; border-radius:8px; box-sizing: border-box;">
-        <p style="font-size:12px; color:#64748b; margin-top:8px;">
-            Belum punya API KEY Groq? Silahkan kembali ke dashboard terlebih dahulu, buat Api Keys nya, Copy dan Tempel diatas.
-        </p>
-        <button class="btn btn-blue" onclick="saveKey()">Simpan & Lanjut</button>
-    </div>
+        <h2>🔑 API Setup (Dual Key)</h2>
+        <input type="password" id="apiKey1" placeholder="API Key Utama: gsk_xxxxxxxxxxxxxxxx" style="width:100%; padding:14px; margin-bottom:10px; border:1px solid #cbd5e1; border-radius:8px; box-sizing: border-box;">
+        <input type="password" id="apiKey2" placeholder="API Key Cadangan (Opsional): gsk_xxxxxxxxxxxxxxxx" style="width:100%; padding:14px; border:1px solid #cbd5e1; border-radius:8px; box-sizing: border-box;">
+        <p style="font-size:12px; color:#64748b; margin-top:8px;">
+            Masukkan 2 API Key. Jika Key Utama terkena Rate Limit, sistem otomatis menggunakan Key Cadangan agar proses tetap ngebut.
+        </p>
+        <button class="btn btn-blue" onclick="saveKey()">Simpan & Lanjut</button>
+    </div>
 
     <div id="c1" class="content">
         <h2>📁 Upload Asset</h2>
@@ -134,10 +135,20 @@
     }
 
     function saveKey() {
-        const k = document.getElementById('apiKey').value.trim();
-        if(k.startsWith('gsk_')) { localStorage.setItem('GROQ_V8_KEY', k); goToTab(1); } else alert("API Key Salah!");
-    }
-    if(localStorage.getItem('GROQ_V8_KEY')) document.getElementById('apiKey').value = localStorage.getItem('GROQ_V8_KEY');
+        const k1 = document.getElementById('apiKey1').value.trim();
+        const k2 = document.getElementById('apiKey2').value.trim();
+        
+        if(k1.startsWith('gsk_')) { 
+            localStorage.setItem('GROQ_V8_KEY1', k1); 
+            if (k2.startsWith('gsk_')) localStorage.setItem('GROQ_V8_KEY2', k2);
+            else localStorage.removeItem('GROQ_V8_KEY2'); // Hapus jika kosong/salah
+            goToTab(1); 
+        } else {
+            alert("API Key Utama wajib diisi dan harus valid!");
+        }
+    }
+    if(localStorage.getItem('GROQ_V8_KEY1')) document.getElementById('apiKey1').value = localStorage.getItem('GROQ_V8_KEY1');
+    if(localStorage.getItem('GROQ_V8_KEY2')) document.getElementById('apiKey2').value = localStorage.getItem('GROQ_V8_KEY2');
 
     async function handleFiles(files) {
         if (!files.length) return;
@@ -168,7 +179,13 @@
     }
 
     async function startProcessing() {
-        const k = localStorage.getItem('GROQ_V8_KEY');
+        const k1 = localStorage.getItem('GROQ_V8_KEY1');
+        const k2 = localStorage.getItem('GROQ_V8_KEY2');
+        const keys = [k1, k2].filter(k => k); // Hanya simpan API key yang ada isinya
+        
+        if (keys.length === 0) { alert("API Key belum disetting!"); goToTab(0); return; }
+
+        let currentKeyIndex = 0; // Mulai dari API Key pertama
         const btn = document.getElementById('btnStart');
         btn.disabled = true; btn.innerText = "HQ Processing...";
 
@@ -177,15 +194,16 @@
             const statusEl = document.getElementById(`status-${item.id}`);
             statusEl.innerHTML = `<span class="status-badge s-run">Working...</span>`;
             
-            // --- MULAI PERBAIKAN: Tambahkan logika Retry untuk Rate Limit ---
             let success = false;
             let retryCount = 0;
-            const maxRetries = 3; // Maksimal coba ulang 3 kali jika rate limit
+            const maxRetries = 3;
 
             while (!success && retryCount < maxRetries) {
                 try {
+                    let activeKey = keys[currentKeyIndex]; // Ambil key yang aktif saat ini
+                    
                     const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                        method: "POST", headers: { "Authorization": `Bearer ${k}`, "Content-Type": "application/json" },
+                        method: "POST", headers: { "Authorization": `Bearer ${activeKey}`, "Content-Type": "application/json" },
                         body: JSON.stringify({
                             model: "meta-llama/llama-4-scout-17b-16e-instruct", 
                             messages: [
@@ -197,14 +215,28 @@
                     const json = await res.json();
                     
                     if (json.error) {
-                        // Jika error karena Rate Limit, tunggu 5 detik lalu coba lagi
                         if (json.error.message.toLowerCase().includes("rate limit")) {
-                            retryCount++;
-                            statusEl.innerHTML = `<span class="status-badge s-run" style="background:#fef3c7; color:#d97706;">Rate Limit. Menunggu 5s... (${retryCount}/${maxRetries})</span>`;
-                            await new Promise(r => setTimeout(r, 5000));
-                            continue; // Ulangi loop while
+                            // Jika punya lebih dari 1 key, langsung pindah (switch) ke key berikutnya
+                            if (keys.length > 1) {
+                                currentKeyIndex = (currentKeyIndex + 1) % keys.length;
+                                statusEl.innerHTML = `<span class="status-badge s-run" style="background:#fef3c7; color:#d97706;">Limit API. Pindah API ${currentKeyIndex + 1}...</span>`;
+                                
+                                // Jika index kembali ke 0 (keduanya limit), baru beri jeda 5 detik
+                                if (currentKeyIndex === 0) {
+                                    retryCount++;
+                                    await new Promise(r => setTimeout(r, 5000));
+                                } else {
+                                    await new Promise(r => setTimeout(r, 1000)); // Jeda 1s saat pindah key
+                                }
+                            } else {
+                                // Jika cuma isi 1 key, logika lama: tunggu 5 detik
+                                retryCount++;
+                                statusEl.innerHTML = `<span class="status-badge s-run" style="background:#fef3c7; color:#d97706;">Rate Limit. Nunggu 5s... (${retryCount}/${maxRetries})</span>`;
+                                await new Promise(r => setTimeout(r, 5000));
+                            }
+                            continue; 
                         }
-                        throw new Error(json.error.message); // Lempar error lain
+                        throw new Error(json.error.message); 
                     }
 
                     const content = JSON.parse(json.choices[0].message.content);
@@ -214,14 +246,13 @@
                     renderResult(item, finalData);
                     statusEl.innerHTML = `<span class="status-badge s-done">DONE</span>`;
                     item.processed = true;
-                    success = true; // Berhasil, keluar dari loop retry
+                    success = true; 
                 } catch (e) { 
                     console.error(e);
                     statusEl.innerHTML = `<span style="color:red; font-size:10px;">${e.message || "Error"}</span>`; 
-                    break; // Hentikan jika errornya selain rate limit
+                    break; 
                 }
             }
-            // --- AKHIR PERBAIKAN ---
 
             await new Promise(r => setTimeout(r, 2000)); 
         }
