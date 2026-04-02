@@ -168,45 +168,65 @@
     }
 
     async function startProcessing() {
-        const k = localStorage.getItem('GROQ_V8_KEY');
-        const btn = document.getElementById('btnStart');
-        btn.disabled = true; btn.innerText = "HQ Processing...";
+        const k = localStorage.getItem('GROQ_V8_KEY');
+        const btn = document.getElementById('btnStart');
+        btn.disabled = true; btn.innerText = "HQ Processing...";
 
-        for (let item of queue) {
-            if (item.processed) continue;
-            const statusEl = document.getElementById(`status-${item.id}`);
-            statusEl.innerHTML = `<span class="status-badge s-run">Working...</span>`;
-            
-            try {
-                const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                    method: "POST", headers: { "Authorization": `Bearer ${k}`, "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        model: "meta-llama/llama-4-scout-17b-16e-instruct", 
-                        messages: [
-                            { role: "system", content: SYSTEM_PROMPT },
-                            { role: "user", content: [{ type: "text", text: "Create Adobe Stock metadata:" }, { type: "image_url", image_url: { url: `data:image/jpeg;base64,${item.base64}` } }] }
-                        ], temperature: 0.1, response_format: { type: "json_object" }
-                    })
-                });
-                const json = await res.json();
-                if (json.error) throw new Error(json.error.message);
+        for (let item of queue) {
+            if (item.processed) continue;
+            const statusEl = document.getElementById(`status-${item.id}`);
+            statusEl.innerHTML = `<span class="status-badge s-run">Working...</span>`;
+            
+            // --- MULAI PERBAIKAN: Tambahkan logika Retry untuk Rate Limit ---
+            let success = false;
+            let retryCount = 0;
+            const maxRetries = 3; // Maksimal coba ulang 3 kali jika rate limit
 
-                const content = JSON.parse(json.choices[0].message.content);
-                const finalData = cleanSEO(content);
-                
-                results.push({ filename: item.name, ...finalData });
-                renderResult(item, finalData);
-                statusEl.innerHTML = `<span class="status-badge s-done">DONE</span>`;
-                item.processed = true;
-            } catch (e) { 
-                console.error(e);
-                statusEl.innerHTML = `<span style="color:red; font-size:10px;">${e.message || "Error"}</span>`; 
-            }
-            
-            await new Promise(r => setTimeout(r, 2000)); 
-        }
-        btn.disabled = false; btn.innerText = "🚀 Mulai Generate"; goToTab(3);
-    }
+            while (!success && retryCount < maxRetries) {
+                try {
+                    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                        method: "POST", headers: { "Authorization": `Bearer ${k}`, "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            model: "meta-llama/llama-4-scout-17b-16e-instruct", 
+                            messages: [
+                                { role: "system", content: SYSTEM_PROMPT },
+                                { role: "user", content: [{ type: "text", text: "Create Adobe Stock metadata:" }, { type: "image_url", image_url: { url: `data:image/jpeg;base64,${item.base64}` } }] }
+                            ], temperature: 0.1, response_format: { type: "json_object" }
+                        })
+                    });
+                    const json = await res.json();
+                    
+                    if (json.error) {
+                        // Jika error karena Rate Limit, tunggu 5 detik lalu coba lagi
+                        if (json.error.message.toLowerCase().includes("rate limit")) {
+                            retryCount++;
+                            statusEl.innerHTML = `<span class="status-badge s-run" style="background:#fef3c7; color:#d97706;">Rate Limit. Menunggu 5s... (${retryCount}/${maxRetries})</span>`;
+                            await new Promise(r => setTimeout(r, 5000));
+                            continue; // Ulangi loop while
+                        }
+                        throw new Error(json.error.message); // Lempar error lain
+                    }
+
+                    const content = JSON.parse(json.choices[0].message.content);
+                    const finalData = cleanSEO(content);
+                    
+                    results.push({ filename: item.name, ...finalData });
+                    renderResult(item, finalData);
+                    statusEl.innerHTML = `<span class="status-badge s-done">DONE</span>`;
+                    item.processed = true;
+                    success = true; // Berhasil, keluar dari loop retry
+                } catch (e) { 
+                    console.error(e);
+                    statusEl.innerHTML = `<span style="color:red; font-size:10px;">${e.message || "Error"}</span>`; 
+                    break; // Hentikan jika errornya selain rate limit
+                }
+            }
+            // --- AKHIR PERBAIKAN ---
+
+            await new Promise(r => setTimeout(r, 2000)); 
+        }
+        btn.disabled = false; btn.innerText = "🚀 Mulai Generate Metadata"; goToTab(3);
+    }
 
     // --- MODIFIKASI: LOGIKA FILTER UNTUK 45-47 KEYWORD ---
     function cleanSEO(data) {
